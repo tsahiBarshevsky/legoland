@@ -104,14 +104,15 @@ app.post('/add-new-user', async (req, res) => {
 app.post('/add-new-product-to-cart', async (req, res) => {
     var id = req.query.id;
     var product = req.body.product;
-    var sum = req.body.sum;
+    var currentSum = req.body.currentSum;
+    var amount = req.body.amount;
     const newProduct = {
         catalogNumber: product.catalogNumber,
         name: product.name,
-        amount: product.amount,
-        sum: product.sum
+        amount: amount,
+        sum: amount * product.price
     };
-    const newSum = sum + (product.sum * product.amount);
+    const newSum = currentSum + newProduct.sum;
     Cart.findByIdAndUpdate(id,
         { $push: { products: newProduct }, sum: newSum },
         function (err) {
@@ -121,6 +122,32 @@ app.post('/add-new-product-to-cart', async (req, res) => {
             }
             else
                 res.json("Product added successfully");
+        }
+    );
+});
+
+// Update product in cart
+app.post('/update-product-in-cart', async (req, res) => {
+    var id = req.query.id;
+    var type = req.query.type;
+    var product = req.body.product;
+    var currentSum = req.body.currentSum;
+    var amount = type === 'increment' ? req.body.amount + 1 : req.body.amount - 1;
+    Cart.findOneAndUpdate({ id, products: { $elemMatch: { catalogNumber: product.catalogNumber } } },
+        {
+            $set: {
+                "products.$.amount": amount,
+                "products.$.sum": amount * product.price
+            },
+            sum: type === 'increment' ? currentSum + product.price : currentSum - product.price
+        },
+        function (err) {
+            if (err) {
+                console.log(err);
+                res.status(500).send(err);
+            }
+            else
+                res.json("Product updeted successfully");
         }
     );
 });
