@@ -22,6 +22,8 @@ mongoose.connect('mongodb://localhost:27017/legoland', {
     // useFindAndModify: false
 });
 
+/* ======= Products ======= */
+
 // Get all products
 app.get('/get-all-products', async (req, res) => {
     Product.find({},
@@ -32,6 +34,25 @@ app.get('/get-all-products', async (req, res) => {
             }
             else {
                 console.log(`${result.length} products found`);
+                res.json(result);
+            }
+        }
+    );
+});
+
+/* ======= Orders ======= */
+
+// Get user's orders
+app.get('/get-user-orders', async (req, res) => {
+    var email = req.query.email;
+    Order.find({ "owner": email },
+        function (err, result) {
+            if (err) {
+                console.log("Error: " + err)
+                res.send(err);
+            }
+            else {
+                console.log(`${result.length} orders found`);
                 res.json(result);
             }
         }
@@ -55,6 +76,26 @@ app.post('/add-new-order', async (req, res) => {
         order_id: newOrder._id,
         message: 'Order added successfully'
     });
+});
+
+/* ======= Users ======= */
+
+// Add new user and create empty cart
+app.post('/add-new-user', async (req, res) => {
+    const newUser = new User({
+        uid: req.body.uid,
+        email: req.body.email,
+        phone: '',
+        address: ''
+    });
+    const cart = new Cart({
+        products: [],
+        sum: 0
+    });
+    await newUser.save();
+    await cart.save();
+    console.log('User added successfully');
+    res.json('User added successfully');
 });
 
 app.get('/check', async (req, res) => {
