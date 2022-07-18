@@ -98,6 +98,34 @@ app.post('/add-new-user', async (req, res) => {
     res.json('User added successfully');
 });
 
+/* ======= Carts ======= */
+
+// Add new product to cart
+app.post('/add-new-product-to-cart', async (req, res) => {
+    var id = req.query.id;
+    var product = req.body.product;
+    var sum = req.body.sum;
+    const newProduct = {
+        catalogNumber: product.catalogNumber,
+        name: product.name,
+        amount: product.amount,
+        sum: product.sum
+    };
+    const newSum = sum + (product.sum * product.amount);
+    Cart.findByIdAndUpdate(id,
+        { $push: { products: newProduct }, sum: newSum },
+        function (err) {
+            if (err) {
+                console.log(err);
+                res.status(500).send(err);
+            }
+            else
+                res.json("Product added successfully");
+        }
+    );
+});
+
+
 app.get('/check', async (req, res) => {
     res.json("check ok");
 });
