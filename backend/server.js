@@ -125,6 +125,24 @@ app.post('/add-new-product-to-cart', async (req, res) => {
     );
 });
 
+// Remove product from cart
+app.post('/remove-product-from-cart', async (req, res) => {
+    var id = req.query.id;
+    var product = req.body.product;
+    var sum = req.body.sum;
+    const newSum = sum - (product.sum * product.amount);
+    Cart.findByIdAndUpdate(id,
+        { $pull: { "products": { catalogNumber: product.catalogNumber } }, sum: newSum },
+        function (err) {
+            if (err) {
+                console.log(err);
+                res.status(500).send(err);
+            }
+            else
+                res.json("Product deleted successfully");
+        }
+    );
+});
 
 app.get('/check', async (req, res) => {
     res.json("check ok");
