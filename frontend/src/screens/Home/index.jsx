@@ -12,6 +12,8 @@ const HomeScreen = () => {
     const products = useSelector(state => state.products);
     const navigation = useNavigation();
 
+    console.log('cart', cart)
+
     const onSignOut = () => {
         signOut(authentication);
         navigation.replace('Login');

@@ -111,7 +111,7 @@ app.post('/add-new-product-to-cart', async (req, res) => {
         catalogNumber: product.catalogNumber,
         name: product.name,
         amount: amount,
-        sum: amount * product.price
+        sum: product.sum
     };
     const newSum = currentSum + newProduct.sum;
     Cart.findByIdAndUpdate(id,

@@ -1,13 +1,61 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import * as Animatable from 'react-native-animatable';
 import { Feather } from '@expo/vector-icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
+import { addNewProductToCart } from '../../redux/actions/cart';
+import { localhost } from '../../utils/utilities';
 
 const DURATION = 100;
 
 const ProductScreen = ({ route }) => {
     const { product } = route.params;
+    const [quantity, setQuantity] = useState(1);
+    const cart = useSelector(state => state.cart);
+    const dispatch = useDispatch();
+    const navigation = useNavigation();
+
+    const increment = () => {
+        if (quantity < product.stock)
+            setQuantity(prevState => prevState + 1);
+    }
+
+    const decrement = () => {
+        if (quantity > 1)
+            setQuantity(prevState => prevState - 1);
+    }
+
+    const onAddNewProductToCart = () => {
+        const newProduct = {
+            catalogNumber: product.catalogNumber,
+            name: product.name,
+            amount: quantity,
+            sum: quantity * product.price
+        };
+        const newSum = cart.sum + newProduct.sum;
+        fetch(`http://${localhost}/add-new-product-to-cart?id=${cart._id}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product: newProduct,
+                    amount: quantity,
+                    currentSum: cart.sum
+                })
+            })
+            .then(res => res.json())
+            .then(res => console.log(res))
+            .catch(error => console.log(error.message))
+            .finally(() => {
+                dispatch(addNewProductToCart(newProduct, newSum));
+                navigation.goBack();
+            });
+    }
 
     return (
         <View style={styles.container}>
@@ -18,14 +66,14 @@ const ProductScreen = ({ route }) => {
                     style={styles.image}
                 />
             </SharedElement>
-            <ScrollView>
+            <ScrollView overScrollMode='never'>
                 <View style={styles.about}>
                     <Animatable.Text
                         style={styles.name}
                         animation='fadeInLeft'
                         delay={DURATION}
                     >
-                        {product.name}
+                        {product.name}({product.stock})
                     </Animatable.Text>
                     <Animatable.Text
                         animation='fadeInRight'
@@ -48,15 +96,18 @@ const ProductScreen = ({ route }) => {
                 delay={DURATION * 4}
             >
                 <View style={styles.quantity}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={increment}>
                         <Feather name="plus" size={15} color="black" />
                     </TouchableOpacity>
-                    <Text>1</Text>
-                    <TouchableOpacity>
+                    <Text>{quantity}</Text>
+                    <TouchableOpacity onPress={decrement}>
                         <Feather name="minus" size={15} color="black" />
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                    onPress={onAddNewProductToCart}
+                    style={styles.button}
+                >
                     <Text style={{ color: 'white' }}>Add to cart</Text>
                 </TouchableOpacity>
             </Animatable.View>
