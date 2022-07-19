@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
 import { localhost } from '../../utils/utilities';
 import { authentication } from '../../utils/firebase';
 
 const SplashScreen = () => {
+    const dispatch = useDispatch();
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -14,8 +16,9 @@ const SplashScreen = () => {
         ])
             .then(([cart, products]) => Promise.all([cart.json(), products.json()]))
             .then(([cart, products]) => {
-                console.log('cart', cart);
-                console.log('products', products)
+                if (cart)
+                    dispatch({ type: 'SET_CART', cart: cart });
+                dispatch({ type: 'SET_PRODUCTS', products: products });
             })
             .finally(navigation.replace('Home'));
     }, []);

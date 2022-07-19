@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
 import { MaterialIcons, Entypo, FontAwesome } from '@expo/vector-icons';
 import { authentication } from '../../utils/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -26,6 +27,7 @@ const RegistrationScreen = () => {
     const [password, setPassword] = useState('');
     const [passwordVisibilty, setPasswordVisibilty] = useState(true);
     const passwordRef = useRef(null);
+    const dispatch = useDispatch();
     const navigation = useNavigation();
 
     const onRegister = () => {
@@ -45,7 +47,14 @@ const RegistrationScreen = () => {
                     })
                     .then(res => res.json())
                     .then(res => console.log(res))
-                    .catch(error => console.log(error.message));
+                    .catch(error => console.log(error.message))
+                    .finally(() => dispatch({
+                        type: 'SET_CART', cart: {
+                            owner: authentication.currentUser.uid,
+                            products: [],
+                            sum: 0
+                        }
+                    }));
             })
             .catch((error) => console.log(error.message));
     }
