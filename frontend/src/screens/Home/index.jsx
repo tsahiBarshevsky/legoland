@@ -12,8 +12,6 @@ const HomeScreen = () => {
     const products = useSelector(state => state.products);
     const navigation = useNavigation();
 
-    console.log('cart', cart)
-
     const onSignOut = () => {
         signOut(authentication);
         navigation.replace('Login');
@@ -26,6 +24,7 @@ const HomeScreen = () => {
                 data={products}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => <ProductCard product={item} />}
+                ItemSeparatorComponent={() => <View style={{ marginVertical: 5 }} />}
             />
             {/* <TouchableOpacity onPress={onSignOut}>
                 <Text>Sign out</Text>

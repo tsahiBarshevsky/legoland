@@ -1,14 +1,20 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { authentication } from '../../utils/firebase';
 
 const Header = ({ cart }) => {
+    const navigation = useNavigation();
+
     return (
         <View style={styles.container}>
             <Feather name="menu" size={24} color="black" />
             <Text>{authentication.currentUser.email}</Text>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('Cart')}
+                style={styles.button}
+            >
                 <Feather name="shopping-cart" size={24} color="black" />
                 {cart.products.length > 0 &&
                     <View style={styles.badge}>

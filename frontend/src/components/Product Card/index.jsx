@@ -30,7 +30,6 @@ export default ProductCard;
 const styles = StyleSheet.create({
     card: {
         width: '50%',
-        marginBottom: 10,
         borderRadius: 10,
         backgroundColor: 'white',
         padding: 10,
