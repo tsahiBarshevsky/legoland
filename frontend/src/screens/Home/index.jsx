@@ -1,16 +1,16 @@
 import React from 'react';
-import { StyleSheet, Platform, StatusBar, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { signOut } from 'firebase/auth';
 import { authentication } from '../../utils/firebase';
+import Header from '../../components/Header';
+import ProductCard from '../../components/Product Card';
 
 const HomeScreen = () => {
     const cart = useSelector(state => state.cart);
     const products = useSelector(state => state.products);
     const navigation = useNavigation();
-
-    console.log('cart', cart)
 
     const onSignOut = () => {
         signOut(authentication);
@@ -19,21 +19,32 @@ const HomeScreen = () => {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={onSignOut}>
+            <Header cart={cart} />
+            <FlatList
+                data={products}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => <ProductCard product={item} />}
+            />
+            {/* <TouchableOpacity onPress={onSignOut}>
                 <Text>Sign out</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             {/* <Text>=====cart======</Text>
             <Text>products in cart: {cart.products.length}</Text>
             <Text>{cart.sum}₪</Text> */}
-            <Text>=====products======</Text>
-            {products.map((product) => {
+            {/* {products.map((product) => {
                 return (
-                    <View key={product._id} style={{ marginBottom: 10 }}>
+                    <View key={product._id} style={styles.card}>
+                        <Image
+                            source={{ uri: product.image }}
+                            style={styles.image}
+                            resizeMode="contain"
+                        />
                         <Text>{product.name}</Text>
                         <Text>{product.description}</Text>
+                        <Text>{product.price}₪</Text>
                     </View>
                 )
-            })}
+            })} */}
         </View>
     )
 }

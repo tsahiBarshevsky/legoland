@@ -20,7 +20,7 @@ const SplashScreen = () => {
                     dispatch({ type: 'SET_CART', cart: cart });
                 dispatch({ type: 'SET_PRODUCTS', products: products });
             })
-            .finally(navigation.replace('Home'));
+            .finally(() => navigation.replace('Home'));
     }, []);
 
     return (
