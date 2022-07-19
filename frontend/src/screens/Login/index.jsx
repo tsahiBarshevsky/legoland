@@ -28,8 +28,7 @@ const LoginScreen = () => {
     const navigation = useNavigation();
 
     const onSignIn = () => {
-        signInWithEmailAndPassword(authentication, email, password)
-            .then(() => navigation.replace('Splash'))
+        signInWithEmailAndPassword(authentication, email.trim(), password)
             .catch((error) => console.log(error.message));
     }
 

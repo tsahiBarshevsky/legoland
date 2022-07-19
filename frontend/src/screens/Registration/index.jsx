@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons, Entypo, FontAwesome } from '@expo/vector-icons';
 import { authentication } from '../../utils/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { localhost } from '../../utils/utilities';
 
 // React Native components
 import {
@@ -28,18 +29,34 @@ const RegistrationScreen = () => {
     const navigation = useNavigation();
 
     const onRegister = () => {
-        setDisabled(true);
-        createUserWithEmailAndPassword(authentication, email, password)
-            .catch((error) => notify(error.message));
+        createUserWithEmailAndPassword(authentication, email.trim(), password)
+            .then(() => {
+                fetch(`http://${localhost}/add-new-user`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            uid: authentication.currentUser.uid,
+                            email: email
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(res => console.log(res))
+                    .catch(error => console.log(error.message));
+            })
+            .catch((error) => console.log(error.message));
     }
 
-    useEffect(() => {
-        const unsubscribe = authentication.onAuthStateChanged((user) => {
-            if (user)
-                navigation.replace('Splash');
-        });
-        return unsubscribe;
-    }, []);
+    // useEffect(() => {
+    //     const unsubscribe = authentication.onAuthStateChanged((user) => {
+    //         if (user)
+    //             navigation.replace('Splash');
+    //     });
+    //     return unsubscribe;
+    // }, []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -116,7 +133,7 @@ const RegistrationScreen = () => {
                     <TouchableOpacity
                         onPress={onRegister}
                         style={styles.button}
-                        activeOpacity={0.8}
+                        // activeOpacity={0.8}
                         disabled={disabled}
                     >
                         <Text style={[styles.text, styles.buttonText]}>
@@ -124,9 +141,9 @@ const RegistrationScreen = () => {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('Registration')}
+                        onPress={() => navigation.goBack()}
                         style={styles.registration}
-                        activeOpacity={1}
+                    // activeOpacity={1}
                     >
                         <Text style={styles.text}>Already have an account? Login</Text>
                     </TouchableOpacity>

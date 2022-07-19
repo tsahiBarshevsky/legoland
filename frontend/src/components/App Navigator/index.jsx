@@ -4,8 +4,10 @@ import { createSharedElementStackNavigator } from 'react-navigation-shared-eleme
 
 // App screens
 import {
+    HomeScreen,
     LoginScreen,
     RegistrationScreen,
+    SplashScreen,
 } from '../../screens';
 
 const Stack = createSharedElementStackNavigator();
@@ -29,6 +31,16 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name='Login'
                     component={LoginScreen}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name='Splash'
+                    component={SplashScreen}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name='Home'
+                    component={HomeScreen}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>

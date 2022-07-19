@@ -90,7 +90,8 @@ app.post('/add-new-user', async (req, res) => {
     });
     const cart = new Cart({
         products: [],
-        sum: 0
+        sum: 0,
+        owner: req.body.uid
     });
     await newUser.save();
     await cart.save();
@@ -167,6 +168,21 @@ app.post('/remove-product-from-cart', async (req, res) => {
             }
             else
                 res.json("Product deleted successfully");
+        }
+    );
+});
+
+// Get user cart
+app.get('/get-user-cart', async (req, res) => {
+    var uid = req.query.uid;
+    Cart.findOne({ "owner": uid },
+        function (err, result) {
+            if (err) {
+                console.log("Error: " + err)
+                res.send(err);
+            }
+            else
+                res.json(result);
         }
     );
 });
