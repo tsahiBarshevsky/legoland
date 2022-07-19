@@ -28,23 +28,6 @@ const HomeScreen = () => {
             {/* <TouchableOpacity onPress={onSignOut}>
                 <Text>Sign out</Text>
             </TouchableOpacity> */}
-            {/* <Text>=====cart======</Text>
-            <Text>products in cart: {cart.products.length}</Text>
-            <Text>{cart.sum}₪</Text> */}
-            {/* {products.map((product) => {
-                return (
-                    <View key={product._id} style={styles.card}>
-                        <Image
-                            source={{ uri: product.image }}
-                            style={styles.image}
-                            resizeMode="contain"
-                        />
-                        <Text>{product.name}</Text>
-                        <Text>{product.description}</Text>
-                        <Text>{product.price}₪</Text>
-                    </View>
-                )
-            })} */}
         </View>
     )
 }

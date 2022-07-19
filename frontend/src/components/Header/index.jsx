@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'lightblue',
         marginVertical: 10
     },
     button: {
@@ -34,16 +33,17 @@ const styles = StyleSheet.create({
     badge: {
         position: 'absolute',
         right: -4,
-        width: 12,
-        height: 12,
-        borderRadius: 6,
+        width: 14,
+        height: 14,
+        borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'red'
+        backgroundColor: 'red',
+        borderWidth: 2,
+        borderColor: '#f5f5f5'
     },
     caption: {
         color: 'white',
-        fontSize: 7,
-        fontWeight: 'bold'
+        fontSize: 7
     }
 });
