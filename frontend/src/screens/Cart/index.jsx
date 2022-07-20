@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, FlatList, Image, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
 import { shipping } from '../../utils/utilities';
 import { removeProductFromCart, updateProductInCart } from '../../redux/actions/cart';
+import { localhost } from '../../utils/utilities';
 
 const CartScreen = () => {
     const cart = useSelector(state => state.cart);
     const products = useSelector(state => state.products);
+    const [checkout, setCheckout] = useState(
+        cart.sum >= 200 ? cart.sum : cart.sum + shipping
+    );
     const dispatch = useDispatch();
 
     const getImageLink = (item) => {
@@ -16,18 +20,81 @@ const CartScreen = () => {
 
     const increment = (product, index) => {
         const item = products.find((e) => e.catalogNumber === product.catalogNumber);
-        if (product.amount < item.stock)
-            dispatch(updateProductInCart(index, 1, 'increment', item.price));
+        if (product.amount < item.stock) {
+            fetch(`http://${localhost}/update-product-in-cart?id=${cart._id}&type=increment`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: product.amount,
+                        newAmount: 1,
+                        product: item,
+                        currentSum: cart.sum
+                    })
+                })
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(error => console.log(error.message))
+                .finally(() => {
+                    dispatch(updateProductInCart(index, 1, 'increment', item.price));
+                    const newCheckout = cart.sum + item.price;
+                    setCheckout(newCheckout >= 200 ? newCheckout : newCheckout + shipping);
+                })
+        }
     }
 
     const decrement = (product, index) => {
-        const item = products.find((e) => e.catalogNumber === product.catalogNumber);
-        if (product.amount > 1)
-            dispatch(updateProductInCart(index, 1, 'decrement', item.price));
+        if (product.amount > 1) {
+            const item = products.find((e) => e.catalogNumber === product.catalogNumber);
+            fetch(`http://${localhost}/update-product-in-cart?id=${cart._id}&type=decrement`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: product.amount,
+                        newAmount: 1,
+                        product: item,
+                        currentSum: cart.sum
+                    })
+                })
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(error => console.log(error.message))
+                .finally(() => {
+                    dispatch(updateProductInCart(index, 1, 'decrement', item.price));
+                    const newCheckout = cart.sum - item.price;
+                    setCheckout(newCheckout >= 200 ? newCheckout : newCheckout + shipping);
+                })
+        }
     }
 
-    const removeProduct = (sum, index) => {
-        dispatch(removeProductFromCart(index, sum));
+    const removeProduct = (product, sum, index) => {
+        fetch(`http://${localhost}/remove-product-from-cart?id=${cart._id}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product: product,
+                    sum: cart.sum - sum
+                })
+            })
+            .then(res => res.json())
+            .then(res => console.log(res))
+            .catch(error => console.log(error.message))
+            .finally(() => {
+                dispatch(removeProductFromCart(index, sum));
+                const newCheckout = cart.sum - sum;
+                setCheckout(newCheckout >= 200 ? newCheckout : newCheckout + shipping);
+            });
     }
 
     const Separator = () => (
@@ -64,7 +131,7 @@ const CartScreen = () => {
                                 </TouchableOpacity>
                             </View>
                             <Text>{item.sum}₪</Text>
-                            <TouchableOpacity onPress={() => removeProduct(item.sum, index)}>
+                            <TouchableOpacity onPress={() => removeProduct(item, item.sum, index)}>
                                 <Text>Remove</Text>
                             </TouchableOpacity>
                         </View>
@@ -84,7 +151,7 @@ const CartScreen = () => {
                 </View>
                 <View style={styles.payment}>
                     <Text>Amount payable</Text>
-                    <Text>{cart.sum >= 200 ? cart.sum : cart.sum + shipping}₪</Text>
+                    <Text>{checkout}₪</Text>
                 </View>
             </View>
         </View>
