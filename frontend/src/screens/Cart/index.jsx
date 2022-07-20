@@ -3,7 +3,7 @@ import { StyleSheet, Platform, StatusBar, Text, View, FlatList, Image, Touchable
 import { useSelector, useDispatch } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
 import { shipping } from '../../utils/utilities';
-import { updateProductInCart } from '../../redux/actions/cart';
+import { removeProductFromCart, updateProductInCart } from '../../redux/actions/cart';
 
 const CartScreen = () => {
     const cart = useSelector(state => state.cart);
@@ -15,14 +15,19 @@ const CartScreen = () => {
     }
 
     const increment = (product, index) => {
-        const stock = products.find((e) => e.catalogNumber === product.catalogNumber).stock;
-        if (product.amount < stock)
-            dispatch(updateProductInCart(index, 1, 'increment'));
+        const item = products.find((e) => e.catalogNumber === product.catalogNumber);
+        if (product.amount < item.stock)
+            dispatch(updateProductInCart(index, 1, 'increment', item.price));
     }
 
     const decrement = (product, index) => {
+        const item = products.find((e) => e.catalogNumber === product.catalogNumber);
         if (product.amount > 1)
-            dispatch(updateProductInCart(index, 1, 'decrement'));
+            dispatch(updateProductInCart(index, 1, 'decrement', item.price));
+    }
+
+    const removeProduct = (index) => {
+        dispatch(removeProductFromCart(index));
     }
 
     const Separator = () => (
@@ -59,8 +64,8 @@ const CartScreen = () => {
                                 </TouchableOpacity>
                             </View>
                             <Text>{item.sum}₪</Text>
-                            <TouchableOpacity>
-                                <Text>Delete</Text>
+                            <TouchableOpacity onPress={() => removeProduct(index)}>
+                                <Text>Remove</Text>
                             </TouchableOpacity>
                         </View>
                     )

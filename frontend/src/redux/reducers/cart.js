@@ -16,26 +16,44 @@ const cartReducer = (state = INITIAL_STATE, action) => {
                 }
             });
         case 'UPDATE_PRODUCT_IN_CART':
-            if (action.payload.type === 'increment')
+            if (action.payload.type === 'increment') {
+                const newAmount = state.products[action.payload.index].amount + action.payload.amount;
                 return update(state, {
                     products: {
                         [action.payload.index]: {
                             $merge: {
-                                amount: state.products[action.payload.index].amount + action.payload.amount
+                                amount: newAmount,
+                                sum: newAmount * action.payload.price
                             }
                         }
+                    },
+                    sum: {
+                        $set: state.sum + (action.payload.amount * action.payload.price)
                     }
                 });
-            else
+            }
+            else {
+                const newAmount = state.products[action.payload.index].amount - action.payload.amount;
                 return update(state, {
                     products: {
                         [action.payload.index]: {
                             $merge: {
-                                amount: state.products[action.payload.index].amount - action.payload.amount
+                                amount: newAmount,
+                                sum: newAmount * action.payload.price
                             }
                         }
+                    },
+                    sum: {
+                        $set: state.sum - (action.payload.amount * action.payload.price)
                     }
                 });
+            }
+        case 'REMOVE_PRODUCT_FROM_CART':
+            return update(state, {
+                products: {
+                    $splice: [[action.payload, 1]]
+                }
+            });
         default:
             return state;
     }
