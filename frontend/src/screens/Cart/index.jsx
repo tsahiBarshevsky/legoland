@@ -26,8 +26,8 @@ const CartScreen = () => {
             dispatch(updateProductInCart(index, 1, 'decrement', item.price));
     }
 
-    const removeProduct = (index) => {
-        dispatch(removeProductFromCart(index));
+    const removeProduct = (sum, index) => {
+        dispatch(removeProductFromCart(index, sum));
     }
 
     const Separator = () => (
@@ -64,7 +64,7 @@ const CartScreen = () => {
                                 </TouchableOpacity>
                             </View>
                             <Text>{item.sum}₪</Text>
-                            <TouchableOpacity onPress={() => removeProduct(index)}>
+                            <TouchableOpacity onPress={() => removeProduct(item.sum, index)}>
                                 <Text>Remove</Text>
                             </TouchableOpacity>
                         </View>

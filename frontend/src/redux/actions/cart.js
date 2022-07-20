@@ -20,10 +20,13 @@ const updateProductInCart = (index, amount, type, price) => {
     }
 };
 
-const removeProductFromCart = (index) => {
+const removeProductFromCart = (index, sum) => {
     return {
         type: 'REMOVE_PRODUCT_FROM_CART',
-        payload: index
+        payload: {
+            index: index,
+            sum: sum
+        }
     }
 };
 

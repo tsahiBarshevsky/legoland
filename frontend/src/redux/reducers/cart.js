@@ -51,7 +51,10 @@ const cartReducer = (state = INITIAL_STATE, action) => {
         case 'REMOVE_PRODUCT_FROM_CART':
             return update(state, {
                 products: {
-                    $splice: [[action.payload, 1]]
+                    $splice: [[action.payload.index, 1]]
+                },
+                sum: {
+                    $set: state.sum - action.payload.sum
                 }
             });
         default:
