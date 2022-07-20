@@ -15,13 +15,27 @@ const cartReducer = (state = INITIAL_STATE, action) => {
                     $set: action.payload.newSum
                 }
             });
-        // const newArray = update(oldArray, {
-        //     people: {
-        //         $push: [
-        //             { name: 'Trevor', age: 45 },
-        //         ]
-        //     }
-        // });
+        case 'UPDATE_PRODUCT_IN_CART':
+            if (action.payload.type === 'increment')
+                return update(state, {
+                    products: {
+                        [action.payload.index]: {
+                            $merge: {
+                                amount: state.products[action.payload.index].amount + action.payload.amount
+                            }
+                        }
+                    }
+                });
+            else
+                return update(state, {
+                    products: {
+                        [action.payload.index]: {
+                            $merge: {
+                                amount: state.products[action.payload.index].amount - action.payload.amount
+                            }
+                        }
+                    }
+                });
         default:
             return state;
     }

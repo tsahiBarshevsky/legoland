@@ -1,15 +1,28 @@
 import React from 'react';
-import { StyleSheet, Platform, StatusBar, Text, View, FlatList, Image } from 'react-native';
-import { useSelector } from 'react-redux';
+import { StyleSheet, Platform, StatusBar, Text, View, FlatList, Image, TouchableOpacity } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { Feather } from '@expo/vector-icons';
 import { shipping } from '../../utils/utilities';
+import { updateProductInCart } from '../../redux/actions/cart';
 
 const CartScreen = () => {
     const cart = useSelector(state => state.cart);
     const products = useSelector(state => state.products);
+    const dispatch = useDispatch();
 
     const getImageLink = (item) => {
-        const product = products.filter((e) => e.catalogNumber === item.catalogNumber);
-        return product[0].image;
+        return products.find((e) => e.catalogNumber === item.catalogNumber).image;
+    }
+
+    const increment = (product, index) => {
+        const stock = products.find((e) => e.catalogNumber === product.catalogNumber).stock;
+        if (product.amount < stock)
+            dispatch(updateProductInCart(index, 1, 'increment'));
+    }
+
+    const decrement = (product, index) => {
+        if (product.amount > 1)
+            dispatch(updateProductInCart(index, 1, 'decrement'));
     }
 
     const Separator = () => (
@@ -27,17 +40,28 @@ const CartScreen = () => {
             <FlatList
                 data={cart.products}
                 keyExtractor={(item) => item.catalogNumber}
-                renderItem={({ item }) => {
+                renderItem={({ item, index }) => {
                     return (
                         <View>
-                            <Text>{item.name}</Text>
-                            <Text>{item.amount} items</Text>
-                            <Text>{item.sum}₪</Text>
                             <Image
                                 source={{ uri: getImageLink(item) }}
                                 resizeMode='center'
                                 style={{ width: 80, height: 80 }}
                             />
+                            <Text>{item.name}</Text>
+                            <View style={styles.quantity}>
+                                <TouchableOpacity onPress={() => increment(item, index)}>
+                                    <Feather name="plus" size={15} color="black" />
+                                </TouchableOpacity>
+                                <Text>{item.amount}</Text>
+                                <TouchableOpacity onPress={() => decrement(item, index)}>
+                                    <Feather name="minus" size={15} color="black" />
+                                </TouchableOpacity>
+                            </View>
+                            <Text>{item.sum}₪</Text>
+                            <TouchableOpacity>
+                                <Text>Delete</Text>
+                            </TouchableOpacity>
                         </View>
                     )
                 }}
@@ -70,6 +94,10 @@ const styles = StyleSheet.create({
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
         backgroundColor: '#f5f5f5',
         paddingHorizontal: 15
+    },
+    quantity: {
+        flexDirection: 'row',
+        alignItems: 'center'
     },
     separator: {
         height: 1,

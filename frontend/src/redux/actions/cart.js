@@ -8,4 +8,15 @@ const addNewProductToCart = (product, newSum) => {
     }
 };
 
-export { addNewProductToCart };
+const updateProductInCart = (index, amount, type) => {
+    return {
+        type: 'UPDATE_PRODUCT_IN_CART',
+        payload: {
+            index: index,
+            amount: amount,
+            type: type
+        }
+    }
+};
+
+export { addNewProductToCart, updateProductInCart };
