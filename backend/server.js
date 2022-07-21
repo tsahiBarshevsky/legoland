@@ -86,7 +86,7 @@ app.post('/add-new-user', async (req, res) => {
         uid: req.body.uid,
         email: req.body.email,
         phone: '',
-        address: ''
+        addresses: []
     });
     const cart = new Cart({
         products: [],
@@ -96,7 +96,21 @@ app.post('/add-new-user', async (req, res) => {
     await newUser.save();
     await cart.save();
     console.log('User added successfully');
-    res.json('User added successfully');
+    res.json(newUser._id);
+});
+
+app.get('/get-user-info', async (req, res) => {
+    const uid = req.query.uid;
+    User.findOne({ "owner": uid },
+        function (err, result) {
+            if (err) {
+                console.log("Error: " + err)
+                res.send(err);
+            }
+            else
+                res.json(result);
+        }
+    );
 });
 
 /* ======= Carts ======= */

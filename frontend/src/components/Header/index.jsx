@@ -1,28 +1,35 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { authentication } from '../../utils/firebase';
+import BottomSheet from '../Bottom Sheet';
 
 const Header = ({ cart }) => {
+    const bottomSheetRef = useRef(null);
     const navigation = useNavigation();
 
     return (
-        <View style={styles.container}>
-            <Feather name="menu" size={24} color="black" />
-            <Text>{authentication.currentUser.email}</Text>
-            <TouchableOpacity
-                onPress={() => navigation.navigate('Cart')}
-                style={styles.button}
-            >
-                <Feather name="shopping-cart" size={24} color="black" />
-                {cart.products.length > 0 &&
-                    <View style={styles.badge}>
-                        <Text style={styles.caption}>{cart.products.length}</Text>
-                    </View>
-                }
-            </TouchableOpacity>
-        </View>
+        <>
+            <View style={styles.container}>
+                <TouchableOpacity onPress={() => bottomSheetRef.current?.open()}>
+                    <Feather name="menu" size={24} color="black" />
+                </TouchableOpacity>
+                <Text>{authentication.currentUser.email}</Text>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Cart')}
+                    style={styles.button}
+                >
+                    <Feather name="shopping-cart" size={24} color="black" />
+                    {cart.products.length > 0 &&
+                        <View style={styles.badge}>
+                            <Text style={styles.caption}>{cart.products.length}</Text>
+                        </View>
+                    }
+                </TouchableOpacity>
+            </View>
+            <BottomSheet bottomSheetRef={bottomSheetRef} />
+        </>
     )
 }
 
@@ -33,17 +40,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginVertical: 10
+        marginTop: 10,
+        marginBottom: 15
     },
     button: {
         position: 'relative'
     },
     badge: {
         position: 'absolute',
-        right: -4,
-        width: 14,
-        height: 14,
-        borderRadius: 8,
+        right: -7,
+        top: -5,
+        width: 18,
+        height: 18,
+        borderRadius: 9,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'red',
@@ -52,6 +61,6 @@ const styles = StyleSheet.create({
     },
     caption: {
         color: 'white',
-        fontSize: 7
+        fontSize: 9
     }
 });

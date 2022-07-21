@@ -13,12 +13,14 @@ const SplashScreen = () => {
         Promise.all([
             fetch(`http://${localhost}/get-user-cart?uid=${authentication.currentUser.uid}`),
             fetch(`http://${localhost}/get-all-products`),
+            fetch(`http://${localhost}/get-user-info`),
         ])
-            .then(([cart, products]) => Promise.all([cart.json(), products.json()]))
-            .then(([cart, products]) => {
+            .then(([cart, products, user]) => Promise.all([cart.json(), products.json(), user.json()]))
+            .then(([cart, products, user]) => {
                 if (cart)
                     dispatch({ type: 'SET_CART', cart: cart });
                 dispatch({ type: 'SET_PRODUCTS', products: products });
+                dispatch({ type: 'SET_USER', user: user });
             })
             .finally(() => navigation.replace('Home'));
     }, []);
