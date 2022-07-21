@@ -1,20 +1,31 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const Filters = () => {
     const [filter, setFilter] = useState('');
+    const navigation = useNavigation();
+
+    const onSearch = () => {
+        if (filter.trim()) {
+            navigation.navigate('Search', { name: filter });
+            setTimeout(() => {
+                setFilter('');
+            }, 500);
+        }
+    }
 
     return (
         <View style={styles.container}>
             <TextInput
                 value={filter}
-                placeholder="Search for a Lego..."
+                placeholder="Search for a Lego pack..."
                 onChangeText={(text) => setFilter(text)}
                 underlineColorAndroid="transparent"
                 // placeholderTextColor={placeholder}
                 // selectionColor={placeholder}
-                // onSubmitEditing={() => passwordRef.current.focus()}
+                onSubmitEditing={onSearch}
                 returnKeyType='search'
                 blurOnSubmit={false}
                 style={styles.textInput}

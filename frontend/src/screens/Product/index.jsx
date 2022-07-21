@@ -65,13 +65,6 @@ const ProductScreen = ({ route }) => {
                 });
         }
         else {
-            // console.log('=========')
-            // console.log({
-            //     amount: cart.products[index].amount,
-            //     newAmount: quantity,
-            //     product: product,
-            //     currentSum: cart.sum
-            // })
             fetch(`http://${localhost}/update-product-in-cart?id=${cart._id}&type=increment`,
                 {
                     method: 'POST',
