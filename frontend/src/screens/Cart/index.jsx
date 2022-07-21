@@ -42,7 +42,7 @@ const CartScreen = () => {
                     dispatch(updateProductInCart(index, 1, 'increment', item.price));
                     const newCheckout = cart.sum + item.price;
                     setCheckout(newCheckout >= 200 ? newCheckout : newCheckout + shipping);
-                })
+                });
         }
     }
 

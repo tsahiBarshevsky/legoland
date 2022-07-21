@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import * as Animatable from 'react-native-animatable';
 import { Feather } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import { addNewProductToCart } from '../../redux/actions/cart';
+import { addNewProductToCart, updateProductInCart } from '../../redux/actions/cart';
 import { localhost } from '../../utils/utilities';
 
 const DURATION = 100;
@@ -13,13 +13,19 @@ const DURATION = 100;
 const ProductScreen = ({ route }) => {
     const { product } = route.params;
     const [quantity, setQuantity] = useState(1);
+    const [editMode, setEditMode] = useState(false);
+    const [quantityInCart, setQuantityInCart] = useState(0);
+    const [index, setIndex] = useState(-1);
     const cart = useSelector(state => state.cart);
+    const products = useSelector(state => state.products);
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
     const increment = () => {
-        if (quantity < product.stock)
+        if (quantity < product.stock && quantity < (product.stock - quantityInCart))
             setQuantity(prevState => prevState + 1);
+        else
+            console.log('cant add anymore')
     }
 
     const decrement = () => {
@@ -28,34 +34,76 @@ const ProductScreen = ({ route }) => {
     }
 
     const onAddNewProductToCart = () => {
-        const newProduct = {
-            catalogNumber: product.catalogNumber,
-            name: product.name,
-            amount: quantity,
-            sum: quantity * product.price
-        };
-        const newSum = cart.sum + newProduct.sum;
-        fetch(`http://${localhost}/add-new-product-to-cart?id=${cart._id}`,
-            {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    product: newProduct,
-                    amount: quantity,
-                    currentSum: cart.sum
+        const editMode = cart.products.findIndex((p) => p.catalogNumber === product.catalogNumber) !== -1;
+        if (!editMode) {
+            const newProduct = {
+                catalogNumber: product.catalogNumber,
+                name: product.name,
+                amount: quantity,
+                sum: quantity * product.price
+            };
+            const newSum = cart.sum + newProduct.sum;
+            fetch(`http://${localhost}/add-new-product-to-cart?id=${cart._id}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product: newProduct,
+                        amount: quantity,
+                        currentSum: cart.sum
+                    })
                 })
-            })
-            .then(res => res.json())
-            .then(res => console.log(res))
-            .catch(error => console.log(error.message))
-            .finally(() => {
-                dispatch(addNewProductToCart(newProduct, newSum));
-                navigation.goBack();
-            });
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(error => console.log(error.message))
+                .finally(() => {
+                    dispatch(addNewProductToCart(newProduct, newSum));
+                    navigation.goBack();
+                });
+        }
+        else {
+            // console.log('=========')
+            // console.log({
+            //     amount: cart.products[index].amount,
+            //     newAmount: quantity,
+            //     product: product,
+            //     currentSum: cart.sum
+            // })
+            fetch(`http://${localhost}/update-product-in-cart?id=${cart._id}&type=increment`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: cart.products[index].amount,
+                        newAmount: quantity,
+                        product: product,
+                        currentSum: cart.sum
+                    })
+                })
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(error => console.log(error.message))
+                .finally(() => {
+                    dispatch(updateProductInCart(index, quantity, 'increment', product.price));
+                    navigation.goBack();
+                });
+        }
     }
+
+    useEffect(() => {
+        const index = cart.products.findIndex((p) => p.catalogNumber === product.catalogNumber);
+        if (index !== -1) {
+            setEditMode(true);
+            setQuantityInCart(cart.products[index].amount);
+            setIndex(index);
+        }
+    }, []);
 
     return (
         <View style={styles.container}>
