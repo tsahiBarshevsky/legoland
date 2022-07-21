@@ -18,9 +18,9 @@ const ProductCard = ({ product }) => {
                     resizeMode="cover"
                 />
             </SharedElement>
-            <Text>{product.name}</Text>
-            {/* <Text>{product.description}</Text> */}
+            <Text style={styles.title}>{product.name}</Text>
             <Text>{product.price}₪</Text>
+            <Text>{product.category}</Text>
         </TouchableOpacity>
     )
 }
@@ -38,5 +38,11 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: 200
+    },
+    title: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        flexGrow: 1,
+        marginBottom: 5
     }
 });

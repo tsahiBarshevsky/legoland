@@ -22,7 +22,7 @@ const Filters = () => {
             <TouchableOpacity
                 style={styles.button}
             >
-                <Ionicons name="filter" size={18} color="white" />
+                <Ionicons name="filter" size={20} color="white" />
             </TouchableOpacity>
         </View>
     )
@@ -35,22 +35,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 100,
-        paddingVertical: 3,
+        backgroundColor: 'white',
+        borderRadius: 25,
+        paddingVertical: 5,
         paddingLeft: 12,
-        paddingRight: 3
+        paddingRight: 5,
+        marginHorizontal: 15,
+        marginBottom: 15
     },
     textInput: {
-        flex: 1
+        flex: 1,
+        marginRight: 10
     },
     button: {
-        height: 30,
-        width: 30,
+        height: 35,
+        width: 35,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#2c3e50',
-        borderRadius: 15
+        borderRadius: 35 / 2
     }
 });

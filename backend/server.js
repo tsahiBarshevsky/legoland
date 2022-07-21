@@ -40,6 +40,23 @@ app.get('/get-all-products', async (req, res) => {
     );
 });
 
+// Search product by name
+app.get('/search-product-by-name', async (req, res) => {
+    const name = req.query.name;
+    Product.find({ "name": { $regex: new RegExp(name, "i") } },
+        function (err, result) {
+            if (err) {
+                console.log("Error: " + err)
+                res.send(err);
+            }
+            else {
+                console.log(`${result.length} products found`);
+                res.json(result);
+            }
+        }
+    );
+});
+
 /* ======= Orders ======= */
 
 // Get user's orders
@@ -99,6 +116,7 @@ app.post('/add-new-user', async (req, res) => {
     res.json(newUser._id);
 });
 
+// Get user information
 app.get('/get-user-info', async (req, res) => {
     const uid = req.query.uid;
     User.findOne({ "owner": uid },
@@ -198,10 +216,6 @@ app.get('/get-user-cart', async (req, res) => {
                 res.json(result);
         }
     );
-});
-
-app.get('/check', async (req, res) => {
-    res.json("check ok");
 });
 
 app.listen(port, () => {

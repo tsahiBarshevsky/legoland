@@ -41,7 +41,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginTop: 10,
-        marginBottom: 15
+        marginBottom: 15,
+        paddingHorizontal: 15
     },
     button: {
         position: 'relative'
