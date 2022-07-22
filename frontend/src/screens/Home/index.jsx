@@ -1,9 +1,8 @@
 import React from 'react';
-import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, FlatList, ScrollView } from 'react-native';
+import { StyleSheet, Platform, StatusBar, View, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
-import Filters from '../../components/Filters';
-import Header from '../../components/Header';
-import ProductCard from '../../components/Product Card';
+import MasonryList from '@react-native-seoul/masonry-list';
+import { Filters, Header, ProductCard } from '../../components';
 
 const HomeScreen = () => {
     const cart = useSelector(state => state.cart);
@@ -14,11 +13,10 @@ const HomeScreen = () => {
             <ScrollView keyboardShouldPersistTaps='handled'>
                 <Header cart={cart} />
                 <Filters />
-                <FlatList
+                <MasonryList
                     data={products}
                     keyExtractor={(item) => item._id}
                     renderItem={({ item }) => <ProductCard product={item} />}
-                    ItemSeparatorComponent={() => <View style={{ marginVertical: 5 }} />}
                     contentContainerStyle={styles.contentContainerStyle}
                 />
             </ScrollView>
@@ -36,7 +34,7 @@ const styles = StyleSheet.create({
         // paddingHorizontal: 15
     },
     contentContainerStyle: {
-        marginHorizontal: 15,
-        marginBottom: 15
+        // marginHorizontal: 15,
+        marginBottom: 5
     }
 });

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, FlatList } from 'react-native';
+import MasonryList from '@react-native-seoul/masonry-list';
 import { localhost } from '../../utils/utilities';
 import { ProductCard } from '../../components';
 
@@ -16,11 +17,10 @@ const SearchScreen = ({ route }) => {
     return (
         <View style={styles.container}>
             <Text>{results.length} Legos were found</Text>
-            <FlatList
+            <MasonryList
                 data={results}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => <ProductCard product={item} />}
-                ItemSeparatorComponent={() => <View style={{ marginVertical: 5 }} />}
                 contentContainerStyle={styles.contentContainerStyle}
             />
         </View>
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
         // paddingHorizontal: 15
     },
     contentContainerStyle: {
-        marginHorizontal: 15,
-        marginBottom: 15
+        // marginHorizontal: 15,
+        marginBottom: 5
     }
 });

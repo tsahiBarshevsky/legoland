@@ -10,6 +10,7 @@ const ProductCard = ({ product }) => {
         <TouchableOpacity
             onPress={() => navigation.navigate('Product', { product })}
             style={styles.card}
+            activeOpacity={1}
         >
             <SharedElement id={`${product._id}.image`}>
                 <Image
@@ -29,11 +30,12 @@ export default ProductCard;
 
 const styles = StyleSheet.create({
     card: {
-        width: '50%',
+        // width: '50%',
         borderRadius: 10,
         backgroundColor: 'white',
         padding: 10,
-        elevation: 1
+        elevation: 1,
+        marginBottom: 15
     },
     image: {
         width: '100%',
