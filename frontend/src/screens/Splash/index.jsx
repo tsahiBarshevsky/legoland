@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
-import { localhost } from '../../utils/utilities';
+import { localhost, sortByPrice } from '../../utils/utilities';
 import { authentication } from '../../utils/firebase';
 
 const SplashScreen = () => {
@@ -19,7 +19,7 @@ const SplashScreen = () => {
             .then(([cart, products, user]) => {
                 if (cart)
                     dispatch({ type: 'SET_CART', cart: cart });
-                dispatch({ type: 'SET_PRODUCTS', products: products });
+                dispatch({ type: 'SET_PRODUCTS', products: products.sort(sortByPrice) });
                 dispatch({ type: 'SET_USER', user: user });
             })
             .finally(() => navigation.replace('Home'));

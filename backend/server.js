@@ -57,6 +57,32 @@ app.get('/search-product-by-name', async (req, res) => {
     );
 });
 
+app.post('/find-product-by-brand', async (req, res) => {
+    const brands = req.body.brands;
+    const ages = req.body.ages;
+    const pieces = req.body.pieces;
+    const prices = req.body.prices;
+    Product.find({
+        $and: [
+            { "brand": { $in: brands } },
+            { "ages": { $gte: ages[0], $lte: ages[1] } },
+            // { "pieces": { $gte: pieces[0], $lte: pieces[1] } },
+            { "price": { $gte: prices[0], $lte: prices[1] } },
+        ]
+    },
+        function (err, result) {
+            if (err) {
+                console.log("Error: " + err)
+                res.send(err);
+            }
+            else {
+                console.log(`${result.length} products found`);
+                res.json(result);
+            }
+        }
+    );
+});
+
 /* ======= Orders ======= */
 
 // Get user's orders

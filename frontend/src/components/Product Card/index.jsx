@@ -21,7 +21,9 @@ const ProductCard = ({ product }) => {
             </SharedElement>
             <Text style={styles.title}>{product.name}</Text>
             <Text>{product.price}₪</Text>
-            <Text>{product.category}</Text>
+            <Text>{product.brand}</Text>
+            <Text>{product.pieces} pieces</Text>
+            <Text>{product.ages}+</Text>
         </TouchableOpacity>
     )
 }
