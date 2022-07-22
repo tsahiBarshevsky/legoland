@@ -3,7 +3,7 @@ import { StyleSheet, Platform, StatusBar, Text, View, FlatList, Image, Touchable
 import { useSelector, useDispatch } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
 import { shipping } from '../../utils/utilities';
-import { removeProductFromCart, updateProductInCart } from '../../redux/actions/cart';
+import { removeProductFromCart, updateProductInCart, emptyCart } from '../../redux/actions/cart';
 import { localhost } from '../../utils/utilities';
 
 const CartScreen = () => {
@@ -97,6 +97,23 @@ const CartScreen = () => {
             });
     }
 
+    const onEmptyCart = () => {
+        fetch(`http://${localhost}/empty-cart?id=${cart._id}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then((res) => res.json())
+            .then((res) => console.log(res))
+            .finally(() => {
+                dispatch(emptyCart());
+                setCheckout(0);
+            });
+    }
+
     const Separator = () => (
         <View style={styles.separator} />
     )
@@ -150,9 +167,17 @@ const CartScreen = () => {
                     <Text>{cart.sum >= 200 ? 'FREE' : `${shipping}₪`}</Text>
                 </View>
                 <View style={styles.payment}>
-                    <Text>Amount payable</Text>
+                    <Text>Total</Text>
                     <Text>{checkout}₪</Text>
                 </View>
+            </View>
+            <View style={styles.options}>
+                <TouchableOpacity onPress={onEmptyCart}>
+                    <Text>Empty cart</Text>
+                </TouchableOpacity>
+                <TouchableOpacity>
+                    <Text>Checkout</Text>
+                </TouchableOpacity>
             </View>
         </View>
     )
@@ -186,6 +211,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
-        marginBottom: 5
+        // marginBottom: 5
+    },
+    options: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15
     }
 });

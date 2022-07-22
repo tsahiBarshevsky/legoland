@@ -8,7 +8,8 @@ const ProductSchema = new mongoose.Schema({
     description: { type: String },
     image: { type: String },
     category: { type: String },
-    age: { type: Number }
+    ages: { type: Number },
+    pieces: { type: Number }
 });
 
 const Product = mongoose.model("products", ProductSchema);

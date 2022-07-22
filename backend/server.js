@@ -203,6 +203,22 @@ app.post('/remove-product-from-cart', async (req, res) => {
     );
 });
 
+app.post('/empty-cart', async (req, res) => {
+    var id = req.query.id;
+    console.log('id', id)
+    Cart.findByIdAndUpdate(id,
+        { $set: { "products": [] }, sum: 0 },
+        function (err) {
+            if (err) {
+                console.log(err);
+                res.status(500).send(err);
+            }
+            else
+                res.json("Cart empty successfully");
+        }
+    );
+});
+
 // Get user cart
 app.get('/get-user-cart', async (req, res) => {
     var uid = req.query.uid;

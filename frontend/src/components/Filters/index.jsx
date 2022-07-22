@@ -3,7 +3,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-const Filters = () => {
+const Filters = ({ filterPanelRef }) => {
     const [filter, setFilter] = useState('');
     const navigation = useNavigation();
 
@@ -31,6 +31,7 @@ const Filters = () => {
                 style={styles.textInput}
             />
             <TouchableOpacity
+                onPress={() => filterPanelRef.current?.open()}
                 style={styles.button}
             >
                 <Ionicons name="filter" size={20} color="white" />

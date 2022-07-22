@@ -1,26 +1,35 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { StyleSheet, Platform, StatusBar, View, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
 import MasonryList from '@react-native-seoul/masonry-list';
-import { Filters, Header, ProductCard } from '../../components';
+import { BottomSheet, FilterPanel, Filters, Header, ProductCard } from '../../components';
 
 const HomeScreen = () => {
     const cart = useSelector(state => state.cart);
     const products = useSelector(state => state.products);
+    const filterPanelRef = useRef(null);
+    const bottomSheetRef = useRef(null);
 
     return (
-        <View style={styles.container}>
-            <ScrollView keyboardShouldPersistTaps='handled'>
-                <Header cart={cart} />
-                <Filters />
-                <MasonryList
-                    data={products}
-                    keyExtractor={(item) => item._id}
-                    renderItem={({ item }) => <ProductCard product={item} />}
-                    contentContainerStyle={styles.contentContainerStyle}
-                />
-            </ScrollView>
-        </View>
+        <>
+            <View style={styles.container}>
+                <ScrollView keyboardShouldPersistTaps='handled'>
+                    <Header
+                        cart={cart}
+                        bottomSheetRef={bottomSheetRef}
+                    />
+                    <Filters filterPanelRef={filterPanelRef} />
+                    <MasonryList
+                        data={products}
+                        keyExtractor={(item) => item._id}
+                        renderItem={({ item }) => <ProductCard product={item} />}
+                        contentContainerStyle={styles.contentContainerStyle}
+                    />
+                </ScrollView>
+            </View>
+            <BottomSheet bottomSheetRef={bottomSheetRef} />
+            <FilterPanel filterPanelRef={filterPanelRef} />
+        </>
     )
 }
 

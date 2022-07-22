@@ -30,4 +30,10 @@ const removeProductFromCart = (index, sum) => {
     }
 };
 
-export { addNewProductToCart, updateProductInCart, removeProductFromCart };
+const emptyCart = () => {
+    return {
+        type: 'EMPTY_CART'
+    }
+}
+
+export { addNewProductToCart, updateProductInCart, removeProductFromCart, emptyCart };

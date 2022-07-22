@@ -57,6 +57,15 @@ const cartReducer = (state = INITIAL_STATE, action) => {
                     $set: state.sum - action.payload.sum
                 }
             });
+        case 'EMPTY_CART':
+            return update(state, {
+                products: {
+                    $set: []
+                },
+                sum: {
+                    $set: 0
+                }
+            });
         default:
             return state;
     }

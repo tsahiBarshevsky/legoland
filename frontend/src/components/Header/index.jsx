@@ -1,12 +1,10 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { authentication } from '../../utils/firebase';
-import BottomSheet from '../Bottom Sheet';
 
-const Header = ({ cart }) => {
-    const bottomSheetRef = useRef(null);
+const Header = ({ cart, bottomSheetRef }) => {
     const navigation = useNavigation();
 
     return (
@@ -28,7 +26,6 @@ const Header = ({ cart }) => {
                     }
                 </TouchableOpacity>
             </View>
-            <BottomSheet bottomSheetRef={bottomSheetRef} />
         </>
     )
 }
