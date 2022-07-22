@@ -22,8 +22,16 @@ const HomeScreen = () => {
                     <MasonryList
                         data={products}
                         keyExtractor={(item) => item._id}
-                        renderItem={({ item }) => <ProductCard product={item} />}
+                        renderItem={({ item, i }) => {
+                            return (
+                                <ProductCard
+                                    product={item}
+                                    index={i}
+                                />
+                            )
+                        }}
                         contentContainerStyle={styles.contentContainerStyle}
+                        style={{ alignSelf: 'stretch' }}
                     />
                 </ScrollView>
             </View>
@@ -44,6 +52,8 @@ const styles = StyleSheet.create({
     },
     contentContainerStyle: {
         // marginHorizontal: 15,
-        marginBottom: 5
+        marginBottom: 5,
+        paddingHorizontal: 15,
+        alignSelf: 'stretch'
     }
 });
