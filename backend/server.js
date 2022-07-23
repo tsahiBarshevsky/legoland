@@ -147,6 +147,37 @@ app.post('/add-new-user', async (req, res) => {
     res.json(newUser._id);
 });
 
+// Update user's address
+app.post('/update-primary-address', async (req, res) => {
+    const id = req.query.id;
+    const type = req.query.type;
+    const address = req.body.address;
+    if (type === 'primary')
+        User.findByIdAndUpdate(id,
+            { $set: { "addresses.primary": address } },
+            function (err) {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send(err);
+                }
+                else
+                    res.json("Address updeted successfully");
+            }
+        );
+    else
+        User.findByIdAndUpdate(id,
+            { $set: { "addresses.secondary": address } },
+            function (err) {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send(err);
+                }
+                else
+                    res.json("Address updeted successfully");
+            }
+        );
+});
+
 // Get user information
 app.get('/get-user-info', async (req, res) => {
     const uid = req.query.uid;

@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { dummyOrders } from '../../utils/utilities';
 
 const ProfileScreen = () => {
+    const user = useSelector(state => state.user);
     const products = useSelector(state => state.products);
 
     const getImageLink = (item) => {
@@ -18,9 +19,19 @@ const ProfileScreen = () => {
     return (
         <View style={styles.container}>
             <ScrollView>
-                <Text style={styles.title}>Account</Text>
-                <Text style={styles.title}>Orders</Text>
+                <Text style={styles.title}>Address Book</Text>
                 <View style={styles.box}>
+                    {Object.keys(user.addresses).length === 0 ?
+                        <Text>There's no address</Text>
+                        :
+                        <View>
+                            <Text>Primary address</Text>
+                            <Text>Secondary address</Text>
+                        </View>
+                    }
+                </View>
+                <Text style={styles.title}>Orders</Text>
+                {/* <View style={styles.box}>
                     <FlatList
                         data={dummyOrders.length < 2 ? dummyOrders : dummyOrders.slice(0, 2)}
                         keyExtractor={(item) => item.orderNumber}
@@ -57,7 +68,7 @@ const ProfileScreen = () => {
                             <Text>See all orders</Text>
                         </TouchableOpacity>
                     }
-                </View>
+                </View> */}
             </ScrollView>
         </View>
     )
