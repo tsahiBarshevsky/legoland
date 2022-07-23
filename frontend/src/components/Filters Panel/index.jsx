@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { localhost, sortByPrice } from '../../utils/utilities';
 
 const defaultAges = [1, 18];
-const defaultPrices = [179, 1200];
+const defaultPrices = [179, 1699];
 
 const FilterPanel = ({ filterPanelRef }) => {
     const [brands, setBrands] = useState([]);
@@ -76,6 +76,9 @@ const FilterPanel = ({ filterPanelRef }) => {
                     <TouchableOpacity onPress={() => onBrandPressed('Marvel')}>
                         <Text>Marvel</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity onPress={() => onBrandPressed('Harry Potter')}>
+                        <Text>Harry Potter</Text>
+                    </TouchableOpacity>
                 </View>
                 <Text style={styles.title}>Ages</Text>
                 <Slider
@@ -86,6 +89,7 @@ const FilterPanel = ({ filterPanelRef }) => {
                     step={1}
                     trackMarks={[5, 10, 15]}
                     renderTrackMarkComponent={() => <View style={styles.mark} />}
+                    onSlidingComplete={() => console.log('completed')}
                 />
                 <Text>{`${ages[0]} - ${ages[1]}`}</Text>
                 <Text style={styles.title}>Price</Text>

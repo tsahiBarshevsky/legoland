@@ -13,7 +13,7 @@ const SplashScreen = () => {
         Promise.all([
             fetch(`http://${localhost}/get-user-cart?uid=${authentication.currentUser.uid}`),
             fetch(`http://${localhost}/get-all-products`),
-            fetch(`http://${localhost}/get-user-info`),
+            fetch(`http://${localhost}/get-user-info?uid=${authentication.currentUser.uid}`),
         ])
             .then(([cart, products, user]) => Promise.all([cart.json(), products.json(), user.json()]))
             .then(([cart, products, user]) => {

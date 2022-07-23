@@ -20,7 +20,7 @@ const Filters = ({ filterPanelRef }) => {
         <View style={styles.container}>
             <TextInput
                 value={filter}
-                placeholder="Search for a Lego pack..."
+                placeholder="Search for a Lego set..."
                 onChangeText={(text) => setFilter(text)}
                 underlineColorAndroid="transparent"
                 // placeholderTextColor={placeholder}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, FlatList, Image, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { shipping } from '../../utils/utilities';
 import { removeProductFromCart, updateProductInCart, emptyCart } from '../../redux/actions/cart';
 import { localhost } from '../../utils/utilities';
@@ -9,10 +10,12 @@ import { localhost } from '../../utils/utilities';
 const CartScreen = () => {
     const cart = useSelector(state => state.cart);
     const products = useSelector(state => state.products);
+    const user = useSelector(state => state.user);
     const [checkout, setCheckout] = useState(
         cart.sum >= 200 ? cart.sum : cart.sum + shipping
     );
     const dispatch = useDispatch();
+    const navigation = useNavigation();
 
     const getImageLink = (item) => {
         return products.find((e) => e.catalogNumber === item.catalogNumber).image;
@@ -114,6 +117,10 @@ const CartScreen = () => {
             });
     }
 
+    const onCheckout = () => {
+        navigation.navigate('Checkout', { checkout, user });
+    }
+
     const Separator = () => (
         <View style={styles.separator} />
     )
@@ -175,7 +182,7 @@ const CartScreen = () => {
                 <TouchableOpacity onPress={onEmptyCart}>
                     <Text>Empty cart</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={onCheckout}>
                     <Text>Checkout</Text>
                 </TouchableOpacity>
             </View>

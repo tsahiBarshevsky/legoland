@@ -13,7 +13,7 @@ app.use(express.json());
 const Product = require('./Models/Product');
 const Order = require('./Models/Order');
 const Cart = require('./Models/Cart');
-const User = require('./Models/Users');
+const User = require('./Models/User');
 
 // Connect to database
 mongoose.connect('mongodb://localhost:27017/legoland', {
@@ -129,7 +129,12 @@ app.post('/add-new-user', async (req, res) => {
         uid: req.body.uid,
         email: req.body.email,
         phone: '',
-        addresses: []
+        firstName: '',
+        lastName: '',
+        addresses: {
+            primary: {},
+            secondary: {}
+        }
     });
     const cart = new Cart({
         products: [],
@@ -145,7 +150,7 @@ app.post('/add-new-user', async (req, res) => {
 // Get user information
 app.get('/get-user-info', async (req, res) => {
     const uid = req.query.uid;
-    User.findOne({ "owner": uid },
+    User.findOne({ "uid": uid },
         function (err, result) {
             if (err) {
                 console.log("Error: " + err)
