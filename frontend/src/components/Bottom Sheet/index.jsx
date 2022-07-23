@@ -8,6 +8,13 @@ import { signOut } from 'firebase/auth';
 const BottomSheet = ({ bottomSheetRef }) => {
     const navigation = useNavigation();
 
+    const onNavigate = (route) => {
+        bottomSheetRef.current?.close();
+        setTimeout(() => {
+            navigation.navigate(route);
+        }, 500);
+    }
+
     const onSignOut = () => {
         bottomSheetRef.current?.close();
         // setTimeout(() => {
@@ -28,7 +35,7 @@ const BottomSheet = ({ bottomSheetRef }) => {
             closeAnimationConfig={{ timing: { duration: 500 } }}
         >
             <View style={styles.bottomSheetContainer}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => onNavigate('Profile')}>
                     <Text>Profile</Text>
                 </TouchableOpacity>
                 <TouchableOpacity>

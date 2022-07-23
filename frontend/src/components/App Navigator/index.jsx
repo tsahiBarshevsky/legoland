@@ -9,10 +9,13 @@ import {
     HomeScreen,
     LoginScreen,
     ProductScreen,
+    ProfileScreen,
     RegistrationScreen,
     SearchScreen,
     SplashScreen,
 } from '../../screens';
+
+const options = { headerShown: false };
 
 const Stack = createSharedElementStackNavigator();
 const theme = {
@@ -30,42 +33,47 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name='Registration'
                     component={RegistrationScreen}
-                    options={{ headerShown: false }}
+                    options={options}
                 />
                 <Stack.Screen
                     name='Login'
                     component={LoginScreen}
-                    options={{ headerShown: false }}
+                    options={options}
                 />
                 <Stack.Screen
                     name='Splash'
                     component={SplashScreen}
-                    options={{ headerShown: false }}
+                    options={options}
                 />
                 <Stack.Screen
                     name='Home'
                     component={HomeScreen}
-                    options={{ headerShown: false }}
+                    options={options}
                 />
                 <Stack.Screen
                     name='Product'
                     component={ProductScreen}
-                    options={{ headerShown: false }}
+                    options={options}
                 />
                 <Stack.Screen
                     name='Cart'
                     component={CartScreen}
-                    options={{ headerShown: false }}
+                    options={options}
                 />
                 <Stack.Screen
                     name='Search'
                     component={SearchScreen}
-                    options={{ headerShown: false }}
+                    options={options}
                 />
                 <Stack.Screen
                     name='Checkout'
                     component={CheckoutScreen}
-                    options={{ headerShown: false }}
+                    options={options}
+                />
+                <Stack.Screen
+                    name='Profile'
+                    component={ProfileScreen}
+                    options={options}
                 />
             </Stack.Navigator>
         </NavigationContainer>

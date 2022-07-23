@@ -6,3 +6,4 @@ export { default as ProductScreen } from './Product';
 export { default as CartScreen } from './Cart';
 export { default as SearchScreen } from './Search';
 export { default as CheckoutScreen } from './Checkout';
+export { default as ProfileScreen } from './Profile';
