@@ -3,12 +3,20 @@ import { StyleSheet, Platform, StatusBar, View, ScrollView } from 'react-native'
 import { useSelector } from 'react-redux';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { BottomSheet, FilterPanel, Filters, Header, ProductCard } from '../../components';
+import moment from 'moment';
 
 const HomeScreen = () => {
     const cart = useSelector(state => state.cart);
     const products = useSelector(state => state.products);
+    const orders = useSelector(state => state.orders);
     const filterPanelRef = useRef(null);
     const bottomSheetRef = useRef(null);
+
+    if (orders.length > 0)
+        console.log('order', {
+            date: moment(orders[0].date).format('DD/MM/YY HH:MM'),
+            number: orders[0].orderNumber
+        });
 
     return (
         <>

@@ -118,7 +118,11 @@ const CartScreen = () => {
     }
 
     const onCheckout = () => {
-        navigation.navigate('Checkout', { checkout, user });
+        navigation.navigate('Checkout', {
+            checkout: checkout,
+            cart: cart,
+            user: user
+        });
     }
 
     const Separator = () => (

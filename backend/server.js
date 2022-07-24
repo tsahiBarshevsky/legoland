@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 const { Stripe } = require('stripe');
 const stripe = Stripe(process.env.SECRET_KEY, { apiVersion: "2020-08-27" });
+const orderid = require('order-id')('key');
 
 const port = process.env.PORT || 5000;
 var router = express.Router();
@@ -107,19 +108,24 @@ app.get('/get-user-orders', async (req, res) => {
 
 // Add new order
 app.post('/add-new-order', async (req, res) => {
+    const orderNumber = orderid.generate();
     const newOrder = new Order({
-        orderNumber: req.body.orderNumber,
+        orderNumber: orderNumber,
         date: req.body.date,
         owner: req.body.owner,
         products: req.body.products,
         sum: req.body.sum,
         address: req.body.address,
-        payment: req.body.payment
+        firstName: req.body.firsName,
+        lastName: req.body.lastName,
+        phone: req.body.phone,
+        paymentConfirmation: req.body.paymentConfirmation
     });
     await newOrder.save();
     console.log('Order added successfully');
     res.json({
-        order_id: newOrder._id,
+        orderId: newOrder._id,
+        orderNumber: orderNumber,
         message: 'Order added successfully'
     });
 });

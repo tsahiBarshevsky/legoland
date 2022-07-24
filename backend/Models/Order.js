@@ -6,8 +6,11 @@ const OrderSchema = new mongoose.Schema({
     owner: { type: String },
     products: { type: Array },
     sum: { type: Number },
-    address: { type: String },
-    payment: { type: String }
+    address: { type: Map },
+    firstName: { type: String },
+    lastName: { type: String },
+    phone: { type: String },
+    paymentConfirmation: { type: Object }
 });
 
 const Order = mongoose.model("orders", OrderSchema);

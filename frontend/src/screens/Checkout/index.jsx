@@ -8,6 +8,8 @@ import { CardField, useConfirmPayment } from '@stripe/stripe-react-native';
 import { Checkbox } from '../../components';
 import { localhost } from '../../utils/utilities';
 import { updateAddresses } from '../../redux/actions/user';
+import { addNewOrder } from '../../redux/actions/orders';
+import { emptyCart } from '../../redux/actions/cart';
 import { authentication } from '../../utils/firebase';
 
 // React Native components
@@ -29,8 +31,12 @@ import {
 const { width } = Dimensions.get('screen');
 
 const CheckoutScreen = ({ route }) => {
-    const { checkout, user } = route.params;
-    const [newOrder, setNewOrder] = useState({});
+    const { checkout, cart, user } = route.params;
+    const [personalDetails, setPersonalDetails] = useState({});
+    const [shippingDetails, setShippingDetails] = useState(
+        user.addresses ? user.addresses.primary : {}
+    );
+    const [paymentConfirmation, setPaymentConfirmation] = useState({});
     const [activeScreen, setActiveScreen] = useState(1);
     const [saveAddress, setSaveAddress] = useState(false);
     const [useAddress, setUseAddress] = useState({
@@ -38,7 +44,6 @@ const CheckoutScreen = ({ route }) => {
         secondary: false
     });
     const [cardDetails, setCardDetails] = useState();
-    const [paymentIntent, setPaymentIntent] = useState({});
     const { confirmPayment, loading } = useConfirmPayment();
     const scrollRef = useRef(null);
     const navigation = useNavigation();
@@ -62,7 +67,8 @@ const CheckoutScreen = ({ route }) => {
         scrollRef.current?.scrollTo({ x: width * (activeScreen - 2) });
     }
 
-    const onChangeAddress = (type) => {
+    const onChangeAddress = (type, address) => {
+        setShippingDetails(address);
         if (type === 'primary')
             setUseAddress(update(useAddress, {
                 $set: {
@@ -79,29 +85,6 @@ const CheckoutScreen = ({ route }) => {
             }));
     }
 
-    const onPurchase = () => {
-        if (saveAddress)
-            fetch(`http://${localhost}/update-addresses?id=${user._id}&type=primary`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        address: newOrder.address
-                    })
-                })
-                .then((res) => res.json())
-                .then((res) => console.log(res))
-                .finally(() => dispatch(updateAddresses(newOrder.address, 'primary')));
-        if (useAddress.primary)
-            console.log('Chosen address:', user.addresses.primary);
-        else
-            console.log('Chosen address:', user.addresses.secondary);
-        navigation.popToTop();
-    }
-
     const fetchPaymentIntentClientSecret = async () => {
         const response = await fetch(`http://${localhost}/create-payment-intent?amount=${checkout}`, {
             method: "POST",
@@ -111,7 +94,7 @@ const CheckoutScreen = ({ route }) => {
         });
         const { clientSecret, error } = await response.json();
         return { clientSecret, error };
-    };
+    }
 
     const handlePay = async () => {
         console.log('hey')
@@ -138,12 +121,74 @@ const CheckoutScreen = ({ route }) => {
                     alert(`Payment Confirmation Error ${error.message}`);
                 } else if (paymentIntent) {
                     alert("Payment Successful");
-                    setPaymentIntent(paymentIntent);
+                    setPaymentConfirmation(paymentIntent);
+                    nextScreen();
                 }
             }
         } catch (e) {
             console.log(e);
         }
+    }
+
+    const onPurchase = () => {
+        const newOrder = {
+            date: new Date(),
+            owner: authentication.currentUser.email,
+            products: cart.products,
+            sum: checkout,
+            address: shippingDetails,
+            firstName: personalDetails.firstName,
+            lastName: personalDetails.lastName,
+            phone: personalDetails.phone,
+            paymentConfirmation: paymentConfirmation
+        };
+        if (saveAddress)
+            fetch(`http://${localhost}/update-addresses?id=${user._id}&type=primary`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        address: newOrder.address
+                    })
+                })
+                .then((res) => res.json())
+                .then((res) => console.log(res))
+                .catch((error) => console.log(error.message))
+                .finally(() => dispatch(updateAddresses(newOrder.address, 'primary')));
+        fetch(`http://${localhost}/add-new-order`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newOrder)
+            })
+            .then((res) => res.json())
+            .then((res) => {
+                console.log(res.message);
+                newOrder._id = res.orderId;
+                newOrder.orderNumber = res.orderNumber;
+                dispatch(addNewOrder(newOrder));
+                fetch(`http://${localhost}/empty-cart?id=${cart._id}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then((res) => res.json())
+                    .then((res) => console.log(res))
+                    .finally(() => {
+                        dispatch(emptyCart());
+                    });
+            })
+            .catch((error) => console.log(error.message))
+            .finally(() => navigation.popToTop());
     }
 
     return (
@@ -195,7 +240,14 @@ const CheckoutScreen = ({ route }) => {
                                 }}
                                 enableReinitialize
                                 onSubmit={(values) => {
-                                    console.log(values);
+                                    setPersonalDetails(update(personalDetails, {
+                                        $set: {
+                                            firstName: values.firstName,
+                                            lastName: values.lastName,
+                                            email: values.email,
+                                            phone: values.phone
+                                        }
+                                    }));
                                     nextScreen();
                                 }}
                             >
@@ -292,10 +344,8 @@ const CheckoutScreen = ({ route }) => {
                                     initialValues={initialValues}
                                     enableReinitialize
                                     onSubmit={(values) => {
-                                        setNewOrder(update(newOrder, {
-                                            $set: {
-                                                address: values
-                                            }
+                                        setShippingDetails(update(shippingDetails, {
+                                            $set: { values }
                                         }));
                                         nextScreen();
                                     }}
@@ -381,11 +431,11 @@ const CheckoutScreen = ({ route }) => {
                         <View>
                             <Text>Select address</Text>
                             <View style={styles.options}>
-                                <TouchableOpacity onPress={() => onChangeAddress('primary')}>
+                                <TouchableOpacity onPress={() => onChangeAddress('primary', user.addresses.primary)}>
                                     <Text>Primary</Text>
                                 </TouchableOpacity>
                                 {user.addresses.secondary &&
-                                    <TouchableOpacity onPress={() => onChangeAddress('secondary')}>
+                                    <TouchableOpacity onPress={() => onChangeAddress('secondary', user.addresses.secondary)}>
                                         <Text>Secondary</Text>
                                     </TouchableOpacity>
                                 }
