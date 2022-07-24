@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import * as Progress from 'react-native-progress';
 import { useNavigation } from '@react-navigation/native'
 import { Formik } from 'formik';
+import update from 'immutability-helper';
 
 // React Native components
 import {
@@ -14,31 +15,23 @@ import {
     ScrollView,
     Button,
     KeyboardAvoidingView,
-    TextInput
+    TextInput,
+    TouchableOpacity
 } from 'react-native';
+import Checkbox from '../../components/Checkbox';
 
 const { width } = Dimensions.get('screen');
 
 const CheckoutScreen = ({ route }) => {
     const { checkout, user } = route.params;
     const [activeScreen, setActiveScreen] = useState(1);
+    const [saveAddress, setSaveAddress] = useState(false);
+    const [useAddress, setUseAddress] = useState({
+        primary: true,
+        secondary: false
+    });
     const scrollRef = useRef(null);
     const navigation = useNavigation();
-
-    const initialValues = user.addresses.primary ?
-        {
-            city: user.addresses.primary.city,
-            street: user.addresses.primary.street,
-            house: user.addresses.primary.house,
-            floor: user.addresses.primary.floor
-        }
-        :
-        {
-            city: '',
-            street: '',
-            house: '',
-            floor: ''
-        };
 
     // Text inputs refs
     const lastNameRef = useRef(null);
@@ -56,6 +49,31 @@ const CheckoutScreen = ({ route }) => {
     const previousScreen = () => {
         setActiveScreen(prevState => prevState - 1);
         scrollRef.current?.scrollTo({ x: width * (activeScreen - 2) });
+    }
+
+    const onChangeAddress = (type) => {
+        if (type === 'primary')
+            setUseAddress(update(useAddress, {
+                $set: {
+                    primary: true,
+                    secondary: false
+                }
+            }));
+        else
+            setUseAddress(update(useAddress, {
+                $set: {
+                    primary: false,
+                    secondary: true
+                }
+            }));
+    }
+
+    const onPurchase = () => {
+        if (useAddress.primary)
+            console.log('Chosen address:', user.addresses.primary);
+        else
+            console.log('Chosen address:', user.addresses.secondary);
+        navigation.popToTop();
     }
 
     return (
@@ -85,6 +103,7 @@ const CheckoutScreen = ({ route }) => {
                 scrollEnabled={false}
                 nestedScrollEnabled
             >
+                {/* Personal details screen */}
                 <View style={styles.screen}>
                     <Button title='next' onPress={nextScreen} />
                     <Text style={styles.title}>Personal details</Text>
@@ -184,99 +203,135 @@ const CheckoutScreen = ({ route }) => {
                         </KeyboardAvoidingView>
                     </ScrollView>
                 </View>
+                {/* Shipping screen */}
                 <View style={styles.screen}>
                     <Button title='prev' onPress={previousScreen} />
                     <Button title='next' onPress={nextScreen} />
                     <Text style={styles.title}>Shipping</Text>
-                    <ScrollView
-                        keyboardShouldPersistTaps="always"
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingBottom: 15 }}
-                    >
-                        <KeyboardAvoidingView
-                            enabled
-                            behavior={Platform.OS === 'ios' ? 'padding' : null}
+                    {Object.keys(user.addresses).length === 0 ?
+                        <ScrollView
+                            keyboardShouldPersistTaps="always"
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={{ paddingBottom: 15 }}
                         >
-                            <Formik
-                                initialValues={initialValues}
-                                enableReinitialize
-                                onSubmit={(values) => {
-                                    console.log(values);
-                                    nextScreen();
-                                }}
+                            <KeyboardAvoidingView
+                                enabled
+                                behavior={Platform.OS === 'ios' ? 'padding' : null}
                             >
-                                {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
-                                    return (
-                                        <View>
-                                            <View style={styles.textInputWrapper}>
-                                                <TextInput
-                                                    placeholder='City...'
-                                                    value={values.city}
-                                                    onChangeText={handleChange('city')}
-                                                    style={styles.textInput}
-                                                    underlineColorAndroid="transparent"
-                                                    // placeholderTextColor={placeholder}
-                                                    // selectionColor={placeholder}
-                                                    blurOnSubmit={false}
-                                                    onBlur={handleBlur('city')}
-                                                    returnKeyType='next'
-                                                    onSubmitEditing={() => streetRef.current?.focus()}
-                                                />
+                                <Formik
+                                    initialValues={initialValues}
+                                    enableReinitialize
+                                    onSubmit={(values) => {
+                                        console.log(values);
+                                        nextScreen();
+                                    }}
+                                >
+                                    {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
+                                        return (
+                                            <View>
+                                                <View style={styles.textInputWrapper}>
+                                                    <TextInput
+                                                        placeholder='City...'
+                                                        value={values.city}
+                                                        onChangeText={handleChange('city')}
+                                                        style={styles.textInput}
+                                                        underlineColorAndroid="transparent"
+                                                        // placeholderTextColor={placeholder}
+                                                        // selectionColor={placeholder}
+                                                        blurOnSubmit={false}
+                                                        onBlur={handleBlur('city')}
+                                                        returnKeyType='next'
+                                                        onSubmitEditing={() => streetRef.current?.focus()}
+                                                    />
+                                                </View>
+                                                <View style={styles.textInputWrapper}>
+                                                    <TextInput
+                                                        placeholder='Street...'
+                                                        value={values.street}
+                                                        ref={streetRef}
+                                                        onChangeText={handleChange('street')}
+                                                        style={styles.textInput}
+                                                        underlineColorAndroid="transparent"
+                                                        // placeholderTextColor={placeholder}
+                                                        // selectionColor={placeholder}
+                                                        blurOnSubmit={false}
+                                                        onBlur={handleBlur('street')}
+                                                        returnKeyType='next'
+                                                        onSubmitEditing={() => houseRef.current?.focus()}
+                                                    />
+                                                </View>
+                                                <View style={styles.textInputWrapper}>
+                                                    <TextInput
+                                                        placeholder='House...'
+                                                        value={values.house}
+                                                        ref={houseRef}
+                                                        onChangeText={handleChange('house')}
+                                                        style={styles.textInput}
+                                                        underlineColorAndroid="transparent"
+                                                        // placeholderTextColor={placeholder}
+                                                        // selectionColor={placeholder}
+                                                        blurOnSubmit={false}
+                                                        onBlur={handleBlur('house')}
+                                                        returnKeyType='next'
+                                                        onSubmitEditing={() => floorRef.current?.focus()}
+                                                        keyboardType='numeric'
+                                                    />
+                                                </View>
+                                                <View style={styles.textInputWrapper}>
+                                                    <TextInput
+                                                        placeholder='Floor number...'
+                                                        value={values.floor}
+                                                        ref={floorRef}
+                                                        onChangeText={handleChange('floor')}
+                                                        style={styles.textInput}
+                                                        underlineColorAndroid="transparent"
+                                                        // placeholderTextColor={placeholder}
+                                                        // selectionColor={placeholder}
+                                                        onBlur={handleBlur('floor')}
+                                                        onSubmitEditing={handleSubmit}
+                                                        keyboardType='numeric'
+                                                    />
+                                                </View>
                                             </View>
-                                            <View style={styles.textInputWrapper}>
-                                                <TextInput
-                                                    placeholder='Street...'
-                                                    value={values.street}
-                                                    ref={streetRef}
-                                                    onChangeText={handleChange('street')}
-                                                    style={styles.textInput}
-                                                    underlineColorAndroid="transparent"
-                                                    // placeholderTextColor={placeholder}
-                                                    // selectionColor={placeholder}
-                                                    blurOnSubmit={false}
-                                                    onBlur={handleBlur('street')}
-                                                    returnKeyType='next'
-                                                    onSubmitEditing={() => houseRef.current?.focus()}
-                                                />
-                                            </View>
-                                            <View style={styles.textInputWrapper}>
-                                                <TextInput
-                                                    placeholder='House...'
-                                                    value={values.house}
-                                                    ref={houseRef}
-                                                    onChangeText={handleChange('house')}
-                                                    style={styles.textInput}
-                                                    underlineColorAndroid="transparent"
-                                                    // placeholderTextColor={placeholder}
-                                                    // selectionColor={placeholder}
-                                                    blurOnSubmit={false}
-                                                    onBlur={handleBlur('house')}
-                                                    returnKeyType='next'
-                                                    onSubmitEditing={() => floorRef.current?.focus()}
-                                                    keyboardType='numeric'
-                                                />
-                                            </View>
-                                            <View style={styles.textInputWrapper}>
-                                                <TextInput
-                                                    placeholder='Floor number...'
-                                                    value={values.floor}
-                                                    ref={floorRef}
-                                                    onChangeText={handleChange('floor')}
-                                                    style={styles.textInput}
-                                                    underlineColorAndroid="transparent"
-                                                    // placeholderTextColor={placeholder}
-                                                    // selectionColor={placeholder}
-                                                    onBlur={handleBlur('floor')}
-                                                    onSubmitEditing={handleSubmit}
-                                                    keyboardType='numeric'
-                                                />
-                                            </View>
-                                        </View>
-                                    )
-                                }}
-                            </Formik>
-                        </KeyboardAvoidingView>
-                    </ScrollView>
+                                        )
+                                    }}
+                                </Formik>
+                                <Checkbox
+                                    checked={saveAddress}
+                                    setChecked={setSaveAddress}
+                                    caption='Save as primary address'
+                                />
+                            </KeyboardAvoidingView>
+                        </ScrollView>
+                        :
+                        <View>
+                            <Text>Select address</Text>
+                            <View style={styles.options}>
+                                <TouchableOpacity onPress={() => onChangeAddress('primary')}>
+                                    <Text>Primary</Text>
+                                </TouchableOpacity>
+                                {user.addresses.secondary &&
+                                    <TouchableOpacity onPress={() => onChangeAddress('secondary')}>
+                                        <Text>Secondary</Text>
+                                    </TouchableOpacity>
+                                }
+                            </View>
+                            {useAddress.primary &&
+                                <>
+                                    <Text>{user.addresses.primary.street}, {user.addresses.primary.city}</Text>
+                                    <Text>Apartment {user.addresses.primary.house}</Text>
+                                    <Text>{user.addresses.primary.floor} Floor</Text>
+                                </>
+                            }
+                            {useAddress.secondary &&
+                                <>
+                                    <Text>{user.addresses.secondary.street}, {user.addresses.secondary.city}</Text>
+                                    <Text>Apartment {user.addresses.secondary.house}</Text>
+                                    <Text>{user.addresses.secondary.floor} Floor</Text>
+                                </>
+                            }
+                        </View>
+                    }
                 </View>
                 <View style={styles.screen}>
                     <Button title='prev' onPress={previousScreen} />
@@ -285,13 +340,20 @@ const CheckoutScreen = ({ route }) => {
                 </View>
                 <View style={styles.screen}>
                     <Button title='prev' onPress={previousScreen} />
-                    <Button title='done' onPress={() => navigation.popToTop()} />
+                    <Button title='done' onPress={onPurchase} />
                     <Text style={styles.title}>Confirmation</Text>
                 </View>
             </ScrollView>
         </View>
     )
 }
+
+const initialValues = {
+    city: '',
+    street: '',
+    house: '',
+    floor: ''
+};
 
 export default CheckoutScreen;
 
@@ -312,12 +374,13 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 18,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        marginBottom: 10
+    },
+    options: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginVertical: 10
     }
 });
-
-
-// city: user.addresses.primary.city,
-// street: user.addresses.primary.street,
-// house: user.addresses.primary.house,
-// floor: user.addresses.primary.floor
