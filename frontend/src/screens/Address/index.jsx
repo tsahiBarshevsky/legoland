@@ -4,6 +4,7 @@ import { Formik } from 'formik';
 import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { updateAddresses } from '../../redux/actions/user';
+import { localhost } from '../../utils/utilities';
 
 const AddressScreen = ({ route }) => {
     const { type, user } = route.params;
@@ -44,8 +45,23 @@ const AddressScreen = ({ route }) => {
     );
 
     const onUpdateAddresses = (address) => {
-        dispatch(updateAddresses(address, type));
-        navigation.goBack();
+        fetch(`http://${localhost}/update-addresses?id=${user._id}&type=${type}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    address: address
+                })
+            })
+            .then((res) => res.json())
+            .then((res) => console.log(res))
+            .finally(() => {
+                dispatch(updateAddresses(address, type));
+                navigation.goBack();
+            });
     }
 
     return (

@@ -3,6 +3,10 @@ import * as Progress from 'react-native-progress';
 import { useNavigation } from '@react-navigation/native'
 import { Formik } from 'formik';
 import update from 'immutability-helper';
+import { useDispatch } from 'react-redux';
+import { Checkbox } from '../../components';
+import { localhost } from '../../utils/utilities';
+import { updateAddresses } from '../../redux/actions/user';
 
 // React Native components
 import {
@@ -18,12 +22,12 @@ import {
     TextInput,
     TouchableOpacity
 } from 'react-native';
-import Checkbox from '../../components/Checkbox';
 
 const { width } = Dimensions.get('screen');
 
 const CheckoutScreen = ({ route }) => {
     const { checkout, user } = route.params;
+    const [newOrder, setNewOrder] = useState({});
     const [activeScreen, setActiveScreen] = useState(1);
     const [saveAddress, setSaveAddress] = useState(false);
     const [useAddress, setUseAddress] = useState({
@@ -32,6 +36,7 @@ const CheckoutScreen = ({ route }) => {
     });
     const scrollRef = useRef(null);
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     // Text inputs refs
     const lastNameRef = useRef(null);
@@ -69,6 +74,21 @@ const CheckoutScreen = ({ route }) => {
     }
 
     const onPurchase = () => {
+        if (saveAddress)
+            fetch(`http://${localhost}/update-addresses?id=${user._id}&type=primary`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        address: newOrder.address
+                    })
+                })
+                .then((res) => res.json())
+                .then((res) => console.log(res))
+                .finally(() => dispatch(updateAddresses(newOrder.address, 'primary')));
         if (useAddress.primary)
             console.log('Chosen address:', user.addresses.primary);
         else
@@ -222,7 +242,11 @@ const CheckoutScreen = ({ route }) => {
                                     initialValues={initialValues}
                                     enableReinitialize
                                     onSubmit={(values) => {
-                                        console.log(values);
+                                        setNewOrder(update(newOrder, {
+                                            $set: {
+                                                address: values
+                                            }
+                                        }));
                                         nextScreen();
                                     }}
                                 >

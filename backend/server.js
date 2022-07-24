@@ -151,6 +151,8 @@ app.post('/add-new-user', async (req, res) => {
 app.post('/update-addresses', async (req, res) => {
     const id = req.query.id;
     const type = req.query.type;
+    console.log('id', id)
+    console.log('type', type)
     const address = req.body.address;
     if (type === 'primary')
         User.findByIdAndUpdate(id,
