@@ -4,9 +4,11 @@ import { useNavigation } from '@react-navigation/native'
 import { Formik } from 'formik';
 import update from 'immutability-helper';
 import { useDispatch } from 'react-redux';
+import { CardField, useConfirmPayment } from '@stripe/stripe-react-native';
 import { Checkbox } from '../../components';
 import { localhost } from '../../utils/utilities';
 import { updateAddresses } from '../../redux/actions/user';
+import { authentication } from '../../utils/firebase';
 
 // React Native components
 import {
@@ -20,7 +22,8 @@ import {
     Button,
     KeyboardAvoidingView,
     TextInput,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 
 const { width } = Dimensions.get('screen');
@@ -34,6 +37,9 @@ const CheckoutScreen = ({ route }) => {
         primary: true,
         secondary: false
     });
+    const [cardDetails, setCardDetails] = useState();
+    const [paymentIntent, setPaymentIntent] = useState({});
+    const { confirmPayment, loading } = useConfirmPayment();
     const scrollRef = useRef(null);
     const navigation = useNavigation();
     const dispatch = useDispatch();
@@ -94,6 +100,50 @@ const CheckoutScreen = ({ route }) => {
         else
             console.log('Chosen address:', user.addresses.secondary);
         navigation.popToTop();
+    }
+
+    const fetchPaymentIntentClientSecret = async () => {
+        const response = await fetch(`http://${localhost}/create-payment-intent?amount=${checkout}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const { clientSecret, error } = await response.json();
+        return { clientSecret, error };
+    };
+
+    const handlePay = async () => {
+        console.log('hey')
+        //1.Gather the customer's billing information (e.g., email)
+        if (!cardDetails?.complete) {
+            Alert.alert("Please enter Complete card details and Email");
+            return;
+        }
+        const billingDetails = {
+            email: authentication.currentUser.email,
+        };
+        //2.Fetch the intent client secret from the backend
+        try {
+            const { clientSecret, error } = await fetchPaymentIntentClientSecret();
+            //2. confirm the payment
+            if (error) {
+                console.log("Unable to process payment");
+            } else {
+                const { paymentIntent, error } = await confirmPayment(clientSecret, {
+                    type: "Card",
+                    billingDetails: billingDetails,
+                });
+                if (error) {
+                    alert(`Payment Confirmation Error ${error.message}`);
+                } else if (paymentIntent) {
+                    alert("Payment Successful");
+                    setPaymentIntent(paymentIntent);
+                }
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     return (
@@ -357,10 +407,21 @@ const CheckoutScreen = ({ route }) => {
                         </View>
                     }
                 </View>
+                {/* Payment screen */}
                 <View style={styles.screen}>
                     <Button title='prev' onPress={previousScreen} />
                     <Button title='next' onPress={nextScreen} />
                     <Text style={styles.title}>Payment</Text>
+                    <CardField
+                        postalCodeEnabled
+                        placeholder={{ number: "4242 4242 4242 4242" }}
+                        cardStyle={styles.card}
+                        style={styles.cardContainer}
+                        onCardChange={(cardDetails) => setCardDetails(cardDetails)}
+                    />
+                    <TouchableOpacity onPress={handlePay} disabled={loading}>
+                        <Text style={!loading ? { color: 'black' } : { color: 'red' }}>Pay</Text>
+                    </TouchableOpacity>
                 </View>
                 <View style={styles.screen}>
                     <Button title='prev' onPress={previousScreen} />
@@ -406,5 +467,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginVertical: 10
+    },
+    card: {
+        backgroundColor: '#efefef',
+        borderRadius: 10,
+        fontSize: 16
+    },
+    cardContainer: {
+        height: 50,
+        marginVertical: 30,
     }
 });

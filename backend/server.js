@@ -1,7 +1,10 @@
+require('dotenv').config({ path: 'backend/.env' })
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
+const { Stripe } = require('stripe');
+const stripe = Stripe(process.env.SECRET_KEY, { apiVersion: "2020-08-27" });
 
 const port = process.env.PORT || 5000;
 var router = express.Router();
@@ -151,8 +154,6 @@ app.post('/add-new-user', async (req, res) => {
 app.post('/update-addresses', async (req, res) => {
     const id = req.query.id;
     const type = req.query.type;
-    console.log('id', id)
-    console.log('type', type)
     const address = req.body.address;
     if (type === 'primary')
         User.findByIdAndUpdate(id,
@@ -296,6 +297,23 @@ app.get('/get-user-cart', async (req, res) => {
                 res.json(result);
         }
     );
+});
+
+app.post('/create-payment-intent', async (req, res) => {
+    const amount = req.query.amount;
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amount,
+            currency: 'usd',
+            payment_method_types: ["card"]
+        });
+        const clientSecret = paymentIntent.client_secret;
+        res.json({ clientSecret: clientSecret });
+    }
+    catch (e) {
+        console.log(e.message);
+        res.json({ error: e.message });
+    }
 });
 
 app.listen(port, () => {
