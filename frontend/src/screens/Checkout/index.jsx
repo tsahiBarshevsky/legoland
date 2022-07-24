@@ -25,6 +25,21 @@ const CheckoutScreen = ({ route }) => {
     const scrollRef = useRef(null);
     const navigation = useNavigation();
 
+    const initialValues = user.addresses.primary ?
+        {
+            city: user.addresses.primary.city,
+            street: user.addresses.primary.street,
+            house: user.addresses.primary.house,
+            floor: user.addresses.primary.floor
+        }
+        :
+        {
+            city: '',
+            street: '',
+            house: '',
+            floor: ''
+        };
+
     // Text inputs refs
     const lastNameRef = useRef(null);
     const emailRef = useRef(null);
@@ -182,85 +197,84 @@ const CheckoutScreen = ({ route }) => {
                             enabled
                             behavior={Platform.OS === 'ios' ? 'padding' : null}
                         >
-                            {Object.keys(user.addresses).length === 0 &&
-                                <Formik
-                                    initialValues={{ city: '', street: '', house: '', floor: '' }}
-                                    enableReinitialize
-                                    onSubmit={(values) => {
-                                        console.log(values);
-                                        nextScreen();
-                                    }}
-                                >
-                                    {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
-                                        return (
-                                            <View>
-                                                <View style={styles.textInputWrapper}>
-                                                    <TextInput
-                                                        placeholder='City...'
-                                                        value={values.city}
-                                                        onChangeText={handleChange('city')}
-                                                        style={styles.textInput}
-                                                        underlineColorAndroid="transparent"
-                                                        // placeholderTextColor={placeholder}
-                                                        // selectionColor={placeholder}
-                                                        blurOnSubmit={false}
-                                                        onBlur={handleBlur('city')}
-                                                        returnKeyType='next'
-                                                        onSubmitEditing={() => streetRef.current?.focus()}
-                                                    />
-                                                </View>
-                                                <View style={styles.textInputWrapper}>
-                                                    <TextInput
-                                                        placeholder='Street...'
-                                                        value={values.street}
-                                                        ref={streetRef}
-                                                        onChangeText={handleChange('street')}
-                                                        style={styles.textInput}
-                                                        underlineColorAndroid="transparent"
-                                                        // placeholderTextColor={placeholder}
-                                                        // selectionColor={placeholder}
-                                                        blurOnSubmit={false}
-                                                        onBlur={handleBlur('street')}
-                                                        returnKeyType='next'
-                                                        onSubmitEditing={() => houseRef.current?.focus()}
-                                                    />
-                                                </View>
-                                                <View style={styles.textInputWrapper}>
-                                                    <TextInput
-                                                        placeholder='House...'
-                                                        value={values.house}
-                                                        ref={houseRef}
-                                                        onChangeText={handleChange('house')}
-                                                        style={styles.textInput}
-                                                        underlineColorAndroid="transparent"
-                                                        // placeholderTextColor={placeholder}
-                                                        // selectionColor={placeholder}
-                                                        blurOnSubmit={false}
-                                                        onBlur={handleBlur('house')}
-                                                        returnKeyType='next'
-                                                        onSubmitEditing={() => floorRef.current?.focus()}
-                                                    />
-                                                </View>
-                                                <View style={styles.textInputWrapper}>
-                                                    <TextInput
-                                                        placeholder='Floor number...'
-                                                        value={values.floor}
-                                                        ref={floorRef}
-                                                        onChangeText={handleChange('flor')}
-                                                        style={styles.textInput}
-                                                        underlineColorAndroid="transparent"
-                                                        // placeholderTextColor={placeholder}
-                                                        // selectionColor={placeholder}
-                                                        onBlur={handleBlur('flor')}
-                                                        onSubmitEditing={handleSubmit}
-                                                        keyboardType='numeric'
-                                                    />
-                                                </View>
+                            <Formik
+                                initialValues={initialValues}
+                                enableReinitialize
+                                onSubmit={(values) => {
+                                    console.log(values);
+                                    nextScreen();
+                                }}
+                            >
+                                {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
+                                    return (
+                                        <View>
+                                            <View style={styles.textInputWrapper}>
+                                                <TextInput
+                                                    placeholder='City...'
+                                                    value={values.city}
+                                                    onChangeText={handleChange('city')}
+                                                    style={styles.textInput}
+                                                    underlineColorAndroid="transparent"
+                                                    // placeholderTextColor={placeholder}
+                                                    // selectionColor={placeholder}
+                                                    blurOnSubmit={false}
+                                                    onBlur={handleBlur('city')}
+                                                    returnKeyType='next'
+                                                    onSubmitEditing={() => streetRef.current?.focus()}
+                                                />
                                             </View>
-                                        )
-                                    }}
-                                </Formik>
-                            }
+                                            <View style={styles.textInputWrapper}>
+                                                <TextInput
+                                                    placeholder='Street...'
+                                                    value={values.street}
+                                                    ref={streetRef}
+                                                    onChangeText={handleChange('street')}
+                                                    style={styles.textInput}
+                                                    underlineColorAndroid="transparent"
+                                                    // placeholderTextColor={placeholder}
+                                                    // selectionColor={placeholder}
+                                                    blurOnSubmit={false}
+                                                    onBlur={handleBlur('street')}
+                                                    returnKeyType='next'
+                                                    onSubmitEditing={() => houseRef.current?.focus()}
+                                                />
+                                            </View>
+                                            <View style={styles.textInputWrapper}>
+                                                <TextInput
+                                                    placeholder='House...'
+                                                    value={values.house}
+                                                    ref={houseRef}
+                                                    onChangeText={handleChange('house')}
+                                                    style={styles.textInput}
+                                                    underlineColorAndroid="transparent"
+                                                    // placeholderTextColor={placeholder}
+                                                    // selectionColor={placeholder}
+                                                    blurOnSubmit={false}
+                                                    onBlur={handleBlur('house')}
+                                                    returnKeyType='next'
+                                                    onSubmitEditing={() => floorRef.current?.focus()}
+                                                    keyboardType='numeric'
+                                                />
+                                            </View>
+                                            <View style={styles.textInputWrapper}>
+                                                <TextInput
+                                                    placeholder='Floor number...'
+                                                    value={values.floor}
+                                                    ref={floorRef}
+                                                    onChangeText={handleChange('floor')}
+                                                    style={styles.textInput}
+                                                    underlineColorAndroid="transparent"
+                                                    // placeholderTextColor={placeholder}
+                                                    // selectionColor={placeholder}
+                                                    onBlur={handleBlur('floor')}
+                                                    onSubmitEditing={handleSubmit}
+                                                    keyboardType='numeric'
+                                                />
+                                            </View>
+                                        </View>
+                                    )
+                                }}
+                            </Formik>
                         </KeyboardAvoidingView>
                     </ScrollView>
                 </View>

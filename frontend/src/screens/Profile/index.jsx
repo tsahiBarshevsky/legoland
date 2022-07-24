@@ -1,12 +1,15 @@
 import React from 'react';
-import { StyleSheet, Platform, StatusBar, Text, View, FlatList, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Platform, StatusBar, Text, View, FlatList, ScrollView, TouchableOpacity, Image, Button } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { dummyOrders } from '../../utils/utilities';
 
 const ProfileScreen = () => {
     const user = useSelector(state => state.user);
     const products = useSelector(state => state.products);
+    const navigation = useNavigation();
 
     const getImageLink = (item) => {
         return products.find((e) => e.catalogNumber === item.catalogNumber).image;
@@ -19,18 +22,53 @@ const ProfileScreen = () => {
     return (
         <View style={styles.container}>
             <ScrollView>
-                <Text style={styles.title}>Address Book</Text>
+                <View style={styles.titleWrapper}>
+                    <Ionicons name="location-sharp" size={24} color="black" />
+                    <Text style={styles.title}>Address Book</Text>
+                </View>
                 <View style={styles.box}>
                     {Object.keys(user.addresses).length === 0 ?
-                        <Text>There's no address</Text>
+                        <View>
+                            <Text>There's no addresses</Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}>
+                                <Text>Add primary address</Text>
+                            </TouchableOpacity>
+                        </View>
                         :
                         <View>
                             <Text>Primary address</Text>
-                            <Text>Secondary address</Text>
+                            {user.addresses.primary &&
+                                <View style={{ marginBottom: 10 }}>
+                                    <Text>{user.addresses.primary.street}, {user.addresses.primary.city}</Text>
+                                    <Text>Apartment {user.addresses.primary.house}</Text>
+                                    <Text>{user.addresses.primary.floor} Floor</Text>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}>
+                                        <Text>Edit address</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            }
+                            {user.addresses.secondary ?
+                                <View>
+                                    <Text>Secondary address</Text>
+                                    <Text>{user.addresses.secondary.street}, {user.addresses.secondary.city}</Text>
+                                    <Text>Apartment {user.addresses.secondary.house}</Text>
+                                    <Text>{user.addresses.secondary.floor} Floor</Text>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}>
+                                        <Text>Edit address</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                :
+                                <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}>
+                                    <Text>Add secondary address</Text>
+                                </TouchableOpacity>
+                            }
                         </View>
                     }
                 </View>
-                <Text style={styles.title}>Orders</Text>
+                <View style={styles.titleWrapper}>
+                    <Feather name="package" size={24} color="black" />
+                    <Text style={styles.title}>Orders</Text>
+                </View>
                 {/* <View style={styles.box}>
                     <FlatList
                         data={dummyOrders.length < 2 ? dummyOrders : dummyOrders.slice(0, 2)}
@@ -83,16 +121,22 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         paddingHorizontal: 15
     },
+    titleWrapper: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginBottom: 5
+    },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 5
     },
     box: {
         backgroundColor: 'white',
         borderRadius: 15,
         paddingHorizontal: 10,
-        paddingVertical: 7
+        paddingVertical: 7,
+        marginBottom: 15
     },
     separator: {
         height: 1,

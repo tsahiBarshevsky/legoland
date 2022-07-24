@@ -148,7 +148,7 @@ app.post('/add-new-user', async (req, res) => {
 });
 
 // Update user's address
-app.post('/update-primary-address', async (req, res) => {
+app.post('/update-addresses', async (req, res) => {
     const id = req.query.id;
     const type = req.query.type;
     const address = req.body.address;
@@ -161,7 +161,7 @@ app.post('/update-primary-address', async (req, res) => {
                     res.status(500).send(err);
                 }
                 else
-                    res.json("Address updeted successfully");
+                    res.json("Primary address updeted successfully");
             }
         );
     else
@@ -173,7 +173,7 @@ app.post('/update-primary-address', async (req, res) => {
                     res.status(500).send(err);
                 }
                 else
-                    res.json("Address updeted successfully");
+                    res.json("Secondary address updeted successfully");
             }
         );
 });

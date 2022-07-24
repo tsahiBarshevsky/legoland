@@ -4,6 +4,7 @@ import { createSharedElementStackNavigator } from 'react-navigation-shared-eleme
 
 // App screens
 import {
+    AddressScreen,
     CartScreen,
     CheckoutScreen,
     HomeScreen,
@@ -73,6 +74,11 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name='Profile'
                     component={ProfileScreen}
+                    options={options}
+                />
+                <Stack.Screen
+                    name='Address'
+                    component={AddressScreen}
                     options={options}
                 />
             </Stack.Navigator>
