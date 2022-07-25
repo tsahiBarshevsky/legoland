@@ -2,17 +2,27 @@ import React from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, FlatList, ScrollView, TouchableOpacity, Image, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
-import { Feather, Ionicons } from '@expo/vector-icons';
+import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
-import { dummyOrders } from '../../utils/utilities';
+// import { dummyOrders } from '../../utils/utilities';
 
 const ProfileScreen = () => {
     const user = useSelector(state => state.user);
     const products = useSelector(state => state.products);
+    const orders = useSelector(state => state.orders);
     const navigation = useNavigation();
 
     const getImageLink = (item) => {
         return products.find((e) => e.catalogNumber === item.catalogNumber).image;
+    }
+
+    const onEditPersonalDetails = () => {
+        navigation.navigate('PersonalDetails', {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phone: user.phone,
+            id: user._id
+        });
     }
 
     const Separator = () => (
@@ -21,10 +31,22 @@ const ProfileScreen = () => {
 
     return (
         <View style={styles.container}>
-            <ScrollView>
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 15 }}>
                 <View style={styles.titleWrapper}>
-                    <Ionicons name="location-sharp" size={24} color="black" />
-                    <Text style={styles.title}>Address Book</Text>
+                    <AntDesign name="user" size={24} color="black" style={styles.icon} />
+                    <Text style={styles.title}>My details</Text>
+                </View>
+                <View style={styles.box}>
+                    <Text>{user.firstName} {user.lastName}</Text>
+                    <Text>{user.email}</Text>
+                    <Text>{user.phone}</Text>
+                    <TouchableOpacity onPress={onEditPersonalDetails}>
+                        <Text>Edit</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.titleWrapper}>
+                    <Ionicons name="location-sharp" size={24} color="black" style={styles.icon} />
+                    <Text style={styles.title}>My Addresses</Text>
                 </View>
                 <View style={styles.box}>
                     {Object.keys(user.addresses).length === 0 ?
@@ -66,19 +88,19 @@ const ProfileScreen = () => {
                     }
                 </View>
                 <View style={styles.titleWrapper}>
-                    <Feather name="package" size={24} color="black" />
-                    <Text style={styles.title}>Orders</Text>
+                    <Feather name="package" size={24} color="black" style={styles.icon} />
+                    <Text style={styles.title}>My orders</Text>
                 </View>
-                {/* <View style={styles.box}>
+                <View style={styles.box}>
                     <FlatList
-                        data={dummyOrders.length < 2 ? dummyOrders : dummyOrders.slice(0, 2)}
+                        data={orders.length < 2 ? orders : orders.slice(0, 2)}
                         keyExtractor={(item) => item.orderNumber}
                         scrollEnabled={false}
                         renderItem={({ item }) => {
                             return (
                                 <View>
                                     <Text>#{item.orderNumber}</Text>
-                                    <Text>{moment(item.date).format('DD/MM/YY')}</Text>
+                                    <Text>{moment(item.date).format('DD/MM/YY HH:mm')}</Text>
                                     <Text>{item.sum}₪</Text>
                                     <FlatList
                                         data={item.products}
@@ -101,12 +123,12 @@ const ProfileScreen = () => {
                         }}
                         ItemSeparatorComponent={Separator}
                     />
-                    {dummyOrders.length > 2 &&
+                    {orders.length > 2 &&
                         <TouchableOpacity style={styles.button}>
                             <Text>See all orders</Text>
                         </TouchableOpacity>
                     }
-                </View> */}
+                </View>
             </ScrollView>
         </View>
     )
@@ -118,8 +140,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-        backgroundColor: '#f5f5f5',
-        paddingHorizontal: 15
+        backgroundColor: '#f5f5f5'
     },
     titleWrapper: {
         flexDirection: 'row',
@@ -127,9 +148,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 5
     },
+    icon: {
+        marginRight: 5
+    },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
+        marginBottom: 2
     },
     box: {
         backgroundColor: 'white',

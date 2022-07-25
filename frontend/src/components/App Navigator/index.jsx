@@ -9,6 +9,7 @@ import {
     CheckoutScreen,
     HomeScreen,
     LoginScreen,
+    PersonalDetailsScreen,
     ProductScreen,
     ProfileScreen,
     RegistrationScreen,
@@ -79,6 +80,11 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name='Address'
                     component={AddressScreen}
+                    options={options}
+                />
+                <Stack.Screen
+                    name='PersonalDetails'
+                    component={PersonalDetailsScreen}
                     options={options}
                 />
             </Stack.Navigator>

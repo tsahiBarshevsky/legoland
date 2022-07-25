@@ -187,6 +187,29 @@ app.post('/update-addresses', async (req, res) => {
         );
 });
 
+// Update personal details
+app.post('/update-personal-details', async (req, res) => {
+    const id = req.query.id;
+    const personalDetails = req.body.personalDetails;
+    User.findByIdAndUpdate(id,
+        {
+            $set: {
+                firstName: personalDetails.firstName,
+                lastName: personalDetails.lastName,
+                phone: personalDetails.phone
+            }
+        },
+        function (err) {
+            if (err) {
+                console.log(err);
+                res.status(500).send(err);
+            }
+            else
+                res.json("Personal details updeted successfully");
+        }
+    );
+});
+
 // Get user information
 app.get('/get-user-info', async (req, res) => {
     const uid = req.query.uid;

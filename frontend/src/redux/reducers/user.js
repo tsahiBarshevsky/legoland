@@ -22,6 +22,14 @@ const userReducer = (state = INITIAL_STATE, action) => {
                     }
                 }
             });
+        case 'UPDATE_PERSONAL_DETAILS':
+            return update(state, {
+                $merge: {
+                    firstName: action.payload.firstName,
+                    lastName: action.payload.lastName,
+                    phone: action.payload.phone
+                }
+            });
         default:
             return state;
     }
