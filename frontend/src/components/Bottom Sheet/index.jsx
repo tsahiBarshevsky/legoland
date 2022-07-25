@@ -38,7 +38,7 @@ const BottomSheet = ({ bottomSheetRef }) => {
                 <TouchableOpacity onPress={() => onNavigate('Profile')}>
                     <Text>Profile</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => onNavigate('WishList')}>
                     <Text>Wishlist</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onSignOut}>

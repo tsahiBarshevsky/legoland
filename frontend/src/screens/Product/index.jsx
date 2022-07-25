@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import * as Animatable from 'react-native-animatable';
-import { Feather } from '@expo/vector-icons';
+import { Feather, AntDesign } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { addNewProductToCart, updateProductInCart } from '../../redux/actions/cart';
+import { addNewProductToWishList, removeProductFromWishList } from '../../redux/actions/wishList';
 import { localhost } from '../../utils/utilities';
 
 const DURATION = 100;
@@ -16,8 +17,9 @@ const ProductScreen = ({ route }) => {
     const [editMode, setEditMode] = useState(false);
     const [quantityInCart, setQuantityInCart] = useState(0);
     const [index, setIndex] = useState(-1);
+    const [inWishList, setInWishList] = useState(false);
     const cart = useSelector(state => state.cart);
-    const products = useSelector(state => state.products);
+    const wishList = useSelector(state => state.wishList);
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
@@ -31,6 +33,46 @@ const ProductScreen = ({ route }) => {
     const decrement = () => {
         if (quantity > 1)
             setQuantity(prevState => prevState - 1);
+    }
+
+    const onAddNewProductToWishList = () => {
+        const index = wishList.products.findIndex((p) => p.catalogNumber === product.catalogNumber);
+        if (index === -1) {
+            fetch(`http://${localhost}/add-new-product-to-wish-list?id=${wishList._id}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ product })
+                })
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(error => console.log(error.message))
+                .finally(() => {
+                    dispatch(addNewProductToWishList(product));
+                    setInWishList(true);
+                });
+        }
+        else {
+            fetch(`http://${localhost}/remove-product-from-wish-list?id=${wishList._id}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ product })
+                })
+                .then(res => res.json())
+                .then(res => console.log(res))
+                .catch(error => console.log(error.message))
+                .finally(() => {
+                    dispatch(removeProductFromWishList(index));
+                    setInWishList(false);
+                });
+        }
     }
 
     const onAddNewProductToCart = () => {
@@ -96,6 +138,9 @@ const ProductScreen = ({ route }) => {
             setQuantityInCart(cart.products[index].amount);
             setIndex(index);
         }
+        const index2 = wishList.products.findIndex((p) => p.catalogNumber === product.catalogNumber);
+        if (index2 !== -1)
+            setInWishList(true);
     }, []);
 
     return (
@@ -107,6 +152,13 @@ const ProductScreen = ({ route }) => {
                     style={styles.image}
                 />
             </SharedElement>
+            <TouchableOpacity onPress={onAddNewProductToWishList}>
+                {inWishList ?
+                    <AntDesign name="heart" size={24} color="red" />
+                    :
+                    <AntDesign name="hearto" size={24} color="red" />
+                }
+            </TouchableOpacity>
             <ScrollView overScrollMode='never'>
                 <View style={styles.about}>
                     <Animatable.Text
@@ -152,7 +204,7 @@ const ProductScreen = ({ route }) => {
                     <Text style={{ color: 'white' }}>Add to cart</Text>
                 </TouchableOpacity>
             </Animatable.View>
-        </View>
+        </View >
     )
 }
 

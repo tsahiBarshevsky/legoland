@@ -15,16 +15,22 @@ const SplashScreen = () => {
             fetch(`http://${localhost}/get-all-products`),
             fetch(`http://${localhost}/get-user-info?uid=${authentication.currentUser.uid}`),
             fetch(`http://${localhost}/get-user-orders?email=${authentication.currentUser.email}`),
+            fetch(`http://${localhost}/get-user-wish-list?uid=${authentication.currentUser.uid}`),
         ])
-            .then(([cart, products, user, orders]) => Promise.all([
-                cart.json(), products.json(), user.json(), orders.json()
+            .then(([cart, products, user, orders, wishList]) => Promise.all([
+                cart.json(),
+                products.json(),
+                user.json(),
+                orders.json(),
+                wishList.json()
             ]))
-            .then(([cart, products, user, orders]) => {
+            .then(([cart, products, user, orders, wishList]) => {
                 if (cart)
                     dispatch({ type: 'SET_CART', cart: cart });
                 dispatch({ type: 'SET_PRODUCTS', products: products.sort(sortByPrice) });
                 dispatch({ type: 'SET_USER', user: user });
                 dispatch({ type: 'SET_ORDERS', orders: orders });
+                dispatch({ type: 'SET_WISH_LIST', wishList: wishList });
             })
             .finally(() => navigation.replace('Home'));
     }, []);

@@ -18,6 +18,7 @@ const Product = require('./Models/Product');
 const Order = require('./Models/Order');
 const Cart = require('./Models/Cart');
 const User = require('./Models/User');
+const WishList = require('./Models/WishList');
 
 // Connect to database
 mongoose.connect('mongodb://localhost:27017/legoland', {
@@ -297,6 +298,7 @@ app.post('/remove-product-from-cart', async (req, res) => {
     );
 });
 
+// Empty cart
 app.post('/empty-cart', async (req, res) => {
     var id = req.query.id;
     console.log('id', id)
@@ -343,6 +345,57 @@ app.post('/create-payment-intent', async (req, res) => {
         console.log(e.message);
         res.json({ error: e.message });
     }
+});
+
+/* ======= Wish Lists ======= */
+
+// Get user wish list
+app.get('/get-user-wish-list', async (req, res) => {
+    var uid = req.query.uid;
+    WishList.findOne({ "owner": uid },
+        function (err, result) {
+            if (err) {
+                console.log("Error: " + err)
+                res.send(err);
+            }
+            else
+                res.json(result);
+        }
+    );
+});
+
+// Add new product to wish list
+app.post('/add-new-product-to-wish-list', async (req, res) => {
+    var id = req.query.id;
+    var product = req.body.product;
+    WishList.findByIdAndUpdate(id,
+        { $push: { products: product } },
+        function (err) {
+            if (err) {
+                console.log(err);
+                res.status(500).send(err);
+            }
+            else
+                res.json("Product added successfully to wishlist");
+        }
+    );
+});
+
+// Remove product from wish list
+app.post('/remove-product-from-wish-list', async (req, res) => {
+    var id = req.query.id;
+    var product = req.body.product;
+    WishList.findByIdAndUpdate(id,
+        { $pull: { "products": { catalogNumber: product.catalogNumber } } },
+        function (err) {
+            if (err) {
+                console.log(err);
+                res.status(500).send(err);
+            }
+            else
+                res.json("Product deleted successfully from wishlist");
+        }
+    );
 });
 
 app.listen(port, () => {

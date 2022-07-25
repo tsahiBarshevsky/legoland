@@ -15,6 +15,7 @@ import {
     RegistrationScreen,
     SearchScreen,
     SplashScreen,
+    WishListScreen,
 } from '../../screens';
 
 const options = { headerShown: false };
@@ -85,6 +86,11 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name='PersonalDetails'
                     component={PersonalDetailsScreen}
+                    options={options}
+                />
+                <Stack.Screen
+                    name='WishList'
+                    component={WishListScreen}
                     options={options}
                 />
             </Stack.Navigator>
