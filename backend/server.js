@@ -62,19 +62,54 @@ app.get('/search-product-by-name', async (req, res) => {
     );
 });
 
-app.post('/find-product-by-brand', async (req, res) => {
+function getFilterQuery(type, brands, ages, prices) {
+    switch (type) {
+        case ('brands-ages-prices'):
+            return ({
+                $and: [
+                    { "brand": { $in: brands } },
+                    { "ages": { $gte: ages[0], $lte: ages[1] } },
+                    { "price": { $gte: prices[0], $lte: prices[1] } }
+                ]
+            });
+        case ('brands-ages'):
+            return ({
+                $and: [
+                    { "brand": { $in: brands } },
+                    { "ages": { $gte: ages[0], $lte: ages[1] } },
+                ]
+            });
+        case ('brands-prices'):
+            return ({
+                $and: [
+                    { "brand": { $in: brands } },
+                    { "price": { $gte: prices[0], $lte: prices[1] } }
+                ]
+            });
+        case ('brands'):
+            return ({ "brand": { $in: brands } });
+        case ('ages-prices'):
+            return ({
+                $and: [
+                    { "ages": { $gte: ages[0], $lte: ages[1] } },
+                    { "price": { $gte: prices[0], $lte: prices[1] } }
+                ]
+            });
+        case ('ages'):
+            return ({ "ages": { $gte: ages[0], $lte: ages[1] } });
+        case ('prices'):
+            return ({ "price": { $gte: prices[0], $lte: prices[1] } });
+    }
+}
+
+// Filter products
+app.post('/filter-products', async (req, res) => {
+    const type = req.query.type;
     const brands = req.body.brands;
     const ages = req.body.ages;
-    const pieces = req.body.pieces;
     const prices = req.body.prices;
-    Product.find({
-        $and: [
-            { "brand": { $in: brands } },
-            { "ages": { $gte: ages[0], $lte: ages[1] } },
-            // { "pieces": { $gte: pieces[0], $lte: pieces[1] } },
-            { "price": { $gte: prices[0], $lte: prices[1] } },
-        ]
-    },
+    const query = getFilterQuery(type, brands, ages, prices);
+    Product.find(query,
         function (err, result) {
             if (err) {
                 console.log("Error: " + err)

@@ -40,9 +40,10 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: 200,
+        height: undefined,
+        aspectRatio: 1,
         marginBottom: 10,
-        borderRadius: 10
+        // borderRadius: 10
     },
     title: {
         fontWeight: 'bold',
