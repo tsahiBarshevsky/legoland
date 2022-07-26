@@ -3,13 +3,14 @@ import * as Progress from 'react-native-progress';
 import { useNavigation } from '@react-navigation/native'
 import { Formik } from 'formik';
 import update from 'immutability-helper';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { CardField, useConfirmPayment } from '@stripe/stripe-react-native';
 import { Checkbox } from '../../components';
 import { localhost } from '../../utils/utilities';
 import { updateAddresses } from '../../redux/actions/user';
 import { addNewOrder } from '../../redux/actions/orders';
 import { emptyCart } from '../../redux/actions/cart';
+import { updateStock } from '../../redux/actions/products';
 import { authentication } from '../../utils/firebase';
 
 // React Native components
@@ -44,6 +45,7 @@ const CheckoutScreen = ({ route }) => {
         secondary: false
     });
     const [cardDetails, setCardDetails] = useState();
+    const products = useSelector(state => state.products);
     const { confirmPayment, loading } = useConfirmPayment();
     const scrollRef = useRef(null);
     const navigation = useNavigation();
@@ -173,6 +175,27 @@ const CheckoutScreen = ({ route }) => {
                 newOrder._id = res.orderId;
                 newOrder.orderNumber = res.orderNumber;
                 dispatch(addNewOrder(newOrder));
+                cart.products.forEach((item) => {
+                    const index = products.findIndex((p) => p.catalogNumber === item.catalogNumber);
+                    fetch(`http://${localhost}/update-product-stock`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                catalogNumber: item.catalogNumber,
+                                currentStock: products[index].stock,
+                                amount: item.amount
+                            })
+                        })
+                        .then((res) => res.json())
+                        .then((res) => console.log(res))
+                        .finally(() => {
+                            dispatch(updateStock(index, item.amount));
+                        });
+                });
                 fetch(`http://${localhost}/empty-cart?id=${cart._id}`,
                     {
                         method: 'POST',

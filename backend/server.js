@@ -88,6 +88,26 @@ app.post('/find-product-by-brand', async (req, res) => {
     );
 });
 
+// Update product stock
+app.post('/update-product-stock', async (req, res) => {
+    const catalogNumber = req.body.catalogNumber;
+    const currentStock = req.body.currentStock;
+    const amount = req.body.amount;
+    Product.findOneAndUpdate(
+        { catalogNumber: catalogNumber },
+        { stock: currentStock - amount },
+        function (err) {
+            if (err) {
+                console.log("Error: " + err)
+                res.send(err);
+            }
+            else {
+                res.json('Stock updated successfully');
+            }
+        }
+    );
+});
+
 /* ======= Orders ======= */
 
 // Get user's orders
