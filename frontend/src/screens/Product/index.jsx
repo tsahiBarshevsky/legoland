@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import * as Animatable from 'react-native-animatable';
-import { Feather, AntDesign } from '@expo/vector-icons';
+import { Feather, AntDesign, Entypo } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { addNewProductToCart, updateProductInCart } from '../../redux/actions/cart';
 import { addNewProductToWishList, removeProductFromWishList } from '../../redux/actions/wishList';
 import { localhost } from '../../utils/utilities';
+import { ThemeContext } from '../../utils/ThemeManager';
+import { lightMode, darkMode } from '../../utils/themes';
 
 const DURATION = 100;
 
 const ProductScreen = ({ route }) => {
     const { product } = route.params;
+    const { theme } = useContext(ThemeContext);
     const [quantity, setQuantity] = useState(1);
     const [editMode, setEditMode] = useState(false);
     const [quantityInCart, setQuantityInCart] = useState(0);
@@ -144,29 +147,37 @@ const ProductScreen = ({ route }) => {
     }, []);
 
     return (
-        <View style={styles.container}>
-            <SharedElement id={`${product._id}.image`}>
+        <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Entypo name="chevron-left" size={24} color="black" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onAddNewProductToWishList}>
+                    {inWishList ?
+                        <AntDesign name="heart" size={20} color="red" />
+                        :
+                        <AntDesign name="hearto" size={20} color="red" />
+                    }
+                </TouchableOpacity>
+            </View>
+            <SharedElement style={{ paddingHorizontal: 15 }} id={`${product._id}.image`}>
                 <Image
                     source={{ uri: product.image }}
-                    resizeMode='cover'
+                    resizeMode='stretch'
                     style={styles.image}
                 />
             </SharedElement>
-            <TouchableOpacity onPress={onAddNewProductToWishList}>
-                {inWishList ?
-                    <AntDesign name="heart" size={24} color="red" />
-                    :
-                    <AntDesign name="hearto" size={24} color="red" />
-                }
-            </TouchableOpacity>
-            <ScrollView overScrollMode='never'>
+            <ScrollView
+                overScrollMode='never'
+                contentContainerStyle={styles.contentContainerStyle}
+            >
                 <View style={styles.about}>
                     <Animatable.Text
                         style={styles.name}
                         animation='fadeInLeft'
                         delay={DURATION}
                     >
-                        {product.name}({product.stock})
+                        {product.name}
                     </Animatable.Text>
                     <Animatable.Text
                         animation='fadeInRight'
@@ -175,6 +186,9 @@ const ProductScreen = ({ route }) => {
                         {product.price}₪
                     </Animatable.Text>
                 </View>
+                <Text>{product.catalogNumber}</Text>
+                <Text>{product.ages}+</Text>
+                <Text>{product.pieces}</Text>
                 <Animatable.Text
                     animation='fadeIn'
                     delay={DURATION * 3}
@@ -204,7 +218,7 @@ const ProductScreen = ({ route }) => {
                     <Text style={{ color: 'white' }}>Add to cart</Text>
                 </TouchableOpacity>
             </Animatable.View>
-        </View >
+        </SafeAreaView>
     )
 }
 
@@ -226,12 +240,25 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
         backgroundColor: '#f5f5f5',
-        paddingHorizontal: 15
+    },
+    containerLight: {
+        backgroundColor: lightMode.background
+    },
+    containerDark: {
+        backgroundColor: darkMode.background
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 15,
+        marginTop: 5,
+        marginBottom: 10
     },
     image: {
-        height: 250,
         width: '100%',
-        marginVertical: 10
+        height: 250,
+        marginBottom: 10
     },
     about: {
         flexDirection: 'row',
@@ -243,6 +270,9 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
     },
+    contentContainerStyle: {
+        paddingHorizontal: 15,
+    },
     description: {
         flexGrow: 1
     },
@@ -250,7 +280,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 15
+        padding: 15
     },
     button: {
         width: '48%',
