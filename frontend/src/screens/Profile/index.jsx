@@ -1,12 +1,26 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { StyleSheet, Platform, StatusBar, Text, View, FlatList, ScrollView, TouchableOpacity, Image, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
-import { AntDesign, Feather, Ionicons, Entypo } from '@expo/vector-icons';
+import { AntDesign, Feather, Ionicons, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { ThemeContext } from '../../utils/ThemeManager';
 import { ThemeSelector } from '../../components';
 import { getIsUsinSystemScheme } from '../../utils/AsyncStorageHandler';
+import { darkMode, lightMode } from '../../utils/themes';
+
+// React Native Components
+import {
+    StyleSheet,
+    Platform,
+    StatusBar,
+    Text,
+    View,
+    FlatList,
+    ScrollView,
+    TouchableOpacity,
+    Image,
+    SafeAreaView
+} from 'react-native';
 
 const ProfileScreen = () => {
     const { theme } = useContext(ThemeContext);
@@ -40,9 +54,8 @@ const ProfileScreen = () => {
 
     return (
         <>
-            <View style={styles.container}>
-                <Text>{isUsinSystemScheme}</Text>
-                <ScrollView contentContainerStyle={{ paddingHorizontal: 15 }}>
+            <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
+                <ScrollView contentContainerStyle={styles.contentContainerStyle}>
                     <View style={styles.titleWrapper}>
                         <AntDesign name="user" size={24} color="black" style={styles.icon} />
                         <Text style={styles.title}>My details</Text>
@@ -144,15 +157,39 @@ const ProfileScreen = () => {
                         <Ionicons name="settings-outline" size={20} color="black" style={styles.icon} />
                         <Text style={styles.title}>Settings</Text>
                     </View>
-                    <View style={styles.setteings}>
-                        <Text>Appearance</Text>
-                        <Text>{theme}</Text>
-                        <TouchableOpacity onPress={() => themeSelectorRef.current?.open()}>
-                            <Entypo name="chevron-small-right" size={24} color="black" />
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity
+                        onPress={() => themeSelectorRef.current?.open()}
+                        style={styles.settings}
+                        activeOpacity={1}
+                    >
+                        <View style={styles.wrapper}>
+                            <View style={[styles.iconWrapper, styles.blue]}>
+                                <MaterialCommunityIcons name="theme-light-dark" size={18} color="#80adce" />
+                            </View>
+                            <Text style={styles.settingsTitle}>Appearance</Text>
+                        </View>
+                        <View style={styles.wrapper}>
+                            <Text style={styles.theme}>{theme}</Text>
+                            <Entypo name="chevron-small-right" size={20} color="grey" />
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => console.log('open modal')}
+                        style={styles.settings}
+                        activeOpacity={1}
+                    >
+                        <View style={styles.wrapper}>
+                            <View style={[styles.iconWrapper, styles.green]}>
+                                <AntDesign name="logout" size={15} color="#47a559" />
+                            </View>
+                            <Text style={styles.settingsTitle}>Logout</Text>
+                        </View>
+                        <View style={styles.wrapper}>
+                            <Entypo name="chevron-small-right" size={20} color="grey" />
+                        </View>
+                    </TouchableOpacity>
                 </ScrollView>
-            </View>
+            </SafeAreaView>
             <ThemeSelector
                 themeSelectorRef={themeSelectorRef}
                 isUsinSystemScheme={isUsinSystemScheme}
@@ -168,7 +205,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-        backgroundColor: '#f5f5f5'
+    },
+    containerLight: {
+        backgroundColor: lightMode.background
+    },
+    containerDark: {
+        backgroundColor: darkMode.background
+    },
+    contentContainerStyle: {
+        paddingHorizontal: 15,
+        paddingBottom: 5
     },
     titleWrapper: {
         flexDirection: 'row',
@@ -200,10 +246,38 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         marginTop: 10
     },
-    setteings: {
+    settings: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 10
+    },
+    settingsTitle: {
+        fontWeight: 'bold',
+        transform: [{ translateY: -1.5 }]
+    },
+    iconWrapper: {
+        width: 30,
+        height: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+        marginRight: 10
+    },
+    blue: {
+        backgroundColor: '#dbecf5'
+    },
+    green: {
+        backgroundColor: '#dff0dd'
+    },
+    wrapper: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
+    theme: {
+        color: 'grey',
+        transform: [{ translateY: -1.5 }],
+        marginRight: 5
     }
 });
