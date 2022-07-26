@@ -5,6 +5,7 @@ import { I18nManager, LogBox } from "react-native";
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { AppNavigator } from './src/components';
+import { ThemeProvider } from './src/utils/ThemeManager';
 import rootReducer from './src/redux/reducers';
 import config from './src/utils/config';
 
@@ -18,7 +19,9 @@ export default function App() {
     return (
         <Provider store={store}>
             <StripeProvider publishableKey={config.PUBLISHABLE_KEY}>
-                <AppNavigator />
+                <ThemeProvider>
+                    <AppNavigator />
+                </ThemeProvider>
             </StripeProvider>
         </Provider>
     );

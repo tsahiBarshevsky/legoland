@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, FlatList, ScrollView, TouchableOpacity, Image, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
-import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
+import { AntDesign, Feather, Ionicons, Entypo } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
-// import { dummyOrders } from '../../utils/utilities';
+import { ThemeContext } from '../../utils/ThemeManager';
+import { ThemeSelector } from '../../components';
+import { getIsUsinSystemScheme } from '../../utils/AsyncStorageHandler';
 
 const ProfileScreen = () => {
+    const { theme } = useContext(ThemeContext);
+    const [isUsinSystemScheme, setIsUsinSystemScheme] = useState('false');
     const user = useSelector(state => state.user);
     const products = useSelector(state => state.products);
     const orders = useSelector(state => state.orders);
     const navigation = useNavigation();
+    const themeSelectorRef = useRef();
 
     const getImageLink = (item) => {
         return products.find((e) => e.catalogNumber === item.catalogNumber).image;
@@ -29,108 +34,131 @@ const ProfileScreen = () => {
         <View style={styles.separator} />
     )
 
+    useEffect(() => {
+        getIsUsinSystemScheme().then((systemScheme) => setIsUsinSystemScheme(systemScheme));
+    }, []);
+
     return (
-        <View style={styles.container}>
-            <ScrollView contentContainerStyle={{ paddingHorizontal: 15 }}>
-                <View style={styles.titleWrapper}>
-                    <AntDesign name="user" size={24} color="black" style={styles.icon} />
-                    <Text style={styles.title}>My details</Text>
-                </View>
-                <View style={styles.box}>
-                    <Text>{user.firstName} {user.lastName}</Text>
-                    <Text>{user.email}</Text>
-                    <Text>{user.phone}</Text>
-                    <TouchableOpacity onPress={onEditPersonalDetails}>
-                        <Text>Edit</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.titleWrapper}>
-                    <Ionicons name="location-sharp" size={24} color="black" style={styles.icon} />
-                    <Text style={styles.title}>My Addresses</Text>
-                </View>
-                <View style={styles.box}>
-                    {Object.keys(user.addresses).length === 0 ?
-                        <View>
-                            <Text>There's no addresses</Text>
-                            <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}>
-                                <Text>Add primary address</Text>
-                            </TouchableOpacity>
-                        </View>
-                        :
-                        <View>
-                            <Text>Primary address</Text>
-                            {user.addresses.primary &&
-                                <View style={{ marginBottom: 10 }}>
-                                    <Text>{user.addresses.primary.street}, {user.addresses.primary.city}</Text>
-                                    <Text>Apartment {user.addresses.primary.house}</Text>
-                                    <Text>{user.addresses.primary.floor} Floor</Text>
-                                    <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}>
-                                        <Text>Edit address</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            }
-                            {user.addresses.secondary ?
-                                <View>
-                                    <Text>Secondary address</Text>
-                                    <Text>{user.addresses.secondary.street}, {user.addresses.secondary.city}</Text>
-                                    <Text>Apartment {user.addresses.secondary.house}</Text>
-                                    <Text>{user.addresses.secondary.floor} Floor</Text>
-                                    <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}>
-                                        <Text>Edit address</Text>
-                                    </TouchableOpacity>
-                                </View>
-                                :
-                                <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}>
-                                    <Text>Add secondary address</Text>
-                                </TouchableOpacity>
-                            }
-                        </View>
-                    }
-                </View>
-                <View style={styles.titleWrapper}>
-                    <Feather name="package" size={24} color="black" style={styles.icon} />
-                    <Text style={styles.title}>My orders</Text>
-                </View>
-                <View style={styles.box}>
-                    <FlatList
-                        data={orders.length < 2 ? orders : orders.slice(0, 2)}
-                        keyExtractor={(item) => item.orderNumber}
-                        scrollEnabled={false}
-                        renderItem={({ item }) => {
-                            return (
-                                <View>
-                                    <Text>#{item.orderNumber}</Text>
-                                    <Text>{moment(item.date).format('DD/MM/YY HH:mm')}</Text>
-                                    <Text>{item.sum}₪</Text>
-                                    <FlatList
-                                        data={item.products}
-                                        horizontal
-                                        scrollEnabled={false}
-                                        keyExtractor={(item) => item.catalogNumber}
-                                        renderItem={({ item }) => {
-                                            return (
-                                                <Image
-                                                    source={{ uri: getImageLink(item) }}
-                                                    resizeMode='center'
-                                                    style={{ width: 40, height: 40 }}
-                                                />
-                                            )
-                                        }}
-                                        ItemSeparatorComponent={() => <View style={{ marginHorizontal: 5 }} />}
-                                    />
-                                </View>
-                            )
-                        }}
-                        ItemSeparatorComponent={Separator}
-                    />
-                    {orders.length > 2 &&
-                        <TouchableOpacity style={styles.button}>
-                            <Text>See all orders</Text>
+        <>
+            <View style={styles.container}>
+                <Text>{isUsinSystemScheme}</Text>
+                <ScrollView contentContainerStyle={{ paddingHorizontal: 15 }}>
+                    <View style={styles.titleWrapper}>
+                        <AntDesign name="user" size={24} color="black" style={styles.icon} />
+                        <Text style={styles.title}>My details</Text>
+                    </View>
+                    <View style={styles.box}>
+                        <Text>{user.firstName} {user.lastName}</Text>
+                        <Text>{user.email}</Text>
+                        <Text>{user.phone}</Text>
+                        <TouchableOpacity onPress={onEditPersonalDetails}>
+                            <Text>Edit</Text>
                         </TouchableOpacity>
-                    }
-                </View>
-            </ScrollView>
-        </View>
+                    </View>
+                    <View style={styles.titleWrapper}>
+                        <Ionicons name="location-sharp" size={24} color="black" style={styles.icon} />
+                        <Text style={styles.title}>My Addresses</Text>
+                    </View>
+                    <View style={styles.box}>
+                        {Object.keys(user.addresses).length === 0 ?
+                            <View>
+                                <Text>There's no addresses</Text>
+                                <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}>
+                                    <Text>Add primary address</Text>
+                                </TouchableOpacity>
+                            </View>
+                            :
+                            <View>
+                                <Text>Primary address</Text>
+                                {user.addresses.primary &&
+                                    <View style={{ marginBottom: 10 }}>
+                                        <Text>{user.addresses.primary.street}, {user.addresses.primary.city}</Text>
+                                        <Text>Apartment {user.addresses.primary.house}</Text>
+                                        <Text>{user.addresses.primary.floor} Floor</Text>
+                                        <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}>
+                                            <Text>Edit address</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
+                                {user.addresses.secondary ?
+                                    <View>
+                                        <Text>Secondary address</Text>
+                                        <Text>{user.addresses.secondary.street}, {user.addresses.secondary.city}</Text>
+                                        <Text>Apartment {user.addresses.secondary.house}</Text>
+                                        <Text>{user.addresses.secondary.floor} Floor</Text>
+                                        <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}>
+                                            <Text>Edit address</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    :
+                                    <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}>
+                                        <Text>Add secondary address</Text>
+                                    </TouchableOpacity>
+                                }
+                            </View>
+                        }
+                    </View>
+                    <View style={styles.titleWrapper}>
+                        <Feather name="package" size={24} color="black" style={styles.icon} />
+                        <Text style={styles.title}>My orders</Text>
+                    </View>
+                    <View style={styles.box}>
+                        <FlatList
+                            data={orders.length < 2 ? orders : orders.slice(0, 2)}
+                            keyExtractor={(item) => item.orderNumber}
+                            scrollEnabled={false}
+                            renderItem={({ item }) => {
+                                return (
+                                    <View>
+                                        <Text>#{item.orderNumber}</Text>
+                                        <Text>{moment(item.date).format('DD/MM/YY HH:mm')}</Text>
+                                        <Text>{item.sum}₪</Text>
+                                        <FlatList
+                                            data={item.products}
+                                            horizontal
+                                            scrollEnabled={false}
+                                            keyExtractor={(item) => item.catalogNumber}
+                                            renderItem={({ item }) => {
+                                                return (
+                                                    <Image
+                                                        source={{ uri: getImageLink(item) }}
+                                                        resizeMode='center'
+                                                        style={{ width: 40, height: 40 }}
+                                                    />
+                                                )
+                                            }}
+                                            ItemSeparatorComponent={() => <View style={{ marginHorizontal: 5 }} />}
+                                        />
+                                    </View>
+                                )
+                            }}
+                            ItemSeparatorComponent={Separator}
+                        />
+                        {orders.length > 2 &&
+                            <TouchableOpacity style={styles.button}>
+                                <Text>See all orders</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
+                    <View style={styles.titleWrapper}>
+                        <Ionicons name="settings-outline" size={20} color="black" style={styles.icon} />
+                        <Text style={styles.title}>Settings</Text>
+                    </View>
+                    <View style={styles.setteings}>
+                        <Text>Appearance</Text>
+                        <Text>{theme}</Text>
+                        <TouchableOpacity onPress={() => themeSelectorRef.current?.open()}>
+                            <Entypo name="chevron-small-right" size={24} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </View>
+            <ThemeSelector
+                themeSelectorRef={themeSelectorRef}
+                isUsinSystemScheme={isUsinSystemScheme}
+                setIsUsinSystemScheme={setIsUsinSystemScheme}
+            />
+        </>
     )
 }
 
@@ -171,5 +199,11 @@ const styles = StyleSheet.create({
     button: {
         alignSelf: 'flex-end',
         marginTop: 10
+    },
+    setteings: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10
     }
 });

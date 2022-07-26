@@ -5,3 +5,4 @@ export { default as FilterPanel } from './Filters Panel';
 export { default as ProductCard } from './Product Card';
 export { default as BottomSheet } from './Bottom Sheet';
 export { default as Checkbox } from './Checkbox';
+export { default as ThemeSelector } from './Theme Selector';
