@@ -427,7 +427,6 @@ const styles = StyleSheet.create({
     },
     buttonCaption: {
         color: 'white',
-        fontWeight: 'bold',
         textTransform: 'capitalize'
     },
     quantity: {

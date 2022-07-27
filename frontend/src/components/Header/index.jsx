@@ -11,12 +11,16 @@ const Header = ({ cart, bottomSheetRef }) => {
 
     return (
         <View style={[styles.container]}>
-            <TouchableOpacity onPress={() => bottomSheetRef.current?.open()}>
+            <TouchableOpacity
+                onPress={() => bottomSheetRef.current?.open()}
+                activeOpacity={0.85}
+            >
                 <Feather name="menu" size={24} color={theme === 'Light' ? "black" : "white"} />
             </TouchableOpacity>
             <TouchableOpacity
                 onPress={() => navigation.navigate('Cart')}
                 style={styles.button}
+                activeOpacity={1}
             >
                 <Feather name="shopping-cart" size={24} color={theme === 'Light' ? "black" : "white"} />
                 {cart.products.length > 0 &&
