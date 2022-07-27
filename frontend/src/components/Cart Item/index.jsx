@@ -10,12 +10,13 @@ const CartItem = (props) => {
 
     return (
         <View style={styles.container}>
-            {/* <Image
-                source={{ uri: image }}
-                resizeMode='center'
-                style={styles.image}
-            /> */}
-            <View style={styles.image} />
+            <View style={[styles.imageWrapper, styles[`imageWrapper${theme}`]]}>
+                <Image
+                    source={{ uri: image }}
+                    resizeMode='stretch'
+                    style={styles.image}
+                />
+            </View>
             <View style={styles.wrapper}>
                 <Text style={[styles.title, styles[`text${theme}`]]}>{item.name}</Text>
                 <Text style={styles[`text${theme}`]}>{item.sum}₪</Text>
@@ -59,12 +60,26 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         paddingHorizontal: 15
     },
-    image: {
-        width: 120,
+    imageWrapper: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 130,
         height: 100,
         marginRight: 15,
-        backgroundColor: 'green',
-        borderRadius: 15
+        borderRadius: 15,
+        paddingVertical: 5
+    },
+    imageWrapperLight: {
+        backgroundColor: lightMode.boxes
+    },
+    imageWrapperDark: {
+        backgroundColor: darkMode.boxes
+    },
+    image: {
+        flex: 1,
+        height: undefined,
+        width: '100%',
+        aspectRatio: 1
     },
     title: {
         fontSize: 17,

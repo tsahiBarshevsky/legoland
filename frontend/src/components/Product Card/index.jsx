@@ -18,8 +18,8 @@ const ProductCard = ({ product, index }) => {
             <SharedElement id={`${product._id}.image`}>
                 <Image
                     source={{ uri: product.image }}
+                    resizeMode='stretch'
                     style={styles.image}
-                    resizeMode="cover"
                 />
             </SharedElement>
             <Text style={[styles.title, styles[`text${theme}`]]}>
@@ -46,11 +46,11 @@ const styles = StyleSheet.create({
         backgroundColor: darkMode.boxes
     },
     image: {
-        width: '100%',
+        flex: 1,
         height: undefined,
+        width: '100%',
         aspectRatio: 1,
-        marginBottom: 10,
-        // borderRadius: 10
+        marginBottom: 15
     },
     title: {
         fontWeight: 'bold',
