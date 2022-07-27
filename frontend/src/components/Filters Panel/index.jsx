@@ -1,15 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Modalize } from 'react-native-modalize';
 import { Slider } from '@miblanchard/react-native-slider';
 import update from 'immutability-helper';
 import { useDispatch } from 'react-redux';
+import { ThemeContext } from '../../utils/ThemeManager';
 import { localhost, sortByPrice } from '../../utils/utilities';
+import { lightMode, darkMode } from '../../utils/themes';
+import { brands as brandsList } from '../../utils/utilities';
 
 const defaultAges = [1, 18];
 const defaultPrices = [179, 1699];
 
 const FilterPanel = ({ filterPanelRef }) => {
+    const { theme } = useContext(ThemeContext);
     const [brands, setBrands] = useState([]);
     const [ages, setAges] = useState(defaultAges);
     const [prices, setPrices] = useState(defaultPrices);
@@ -121,6 +125,10 @@ const FilterPanel = ({ filterPanelRef }) => {
                 .finally(() => filterPanelRef.current?.close());
     }
 
+    const isInBrands = (brand) => {
+        return brands.findIndex((e) => e === brand) !== -1;
+    }
+
     useEffect(() => {
         if (brands.length === 0)
             setBrandsApply(false);
@@ -132,27 +140,37 @@ const FilterPanel = ({ filterPanelRef }) => {
         <Modalize
             ref={filterPanelRef}
             threshold={50}
+            withHandle={false}
             adjustToContentHeight
             handlePosition='inside'
-            modalStyle={styles.modalStyle}
-            handleStyle={styles.handleStyle}
+            modalStyle={[styles.modalStyle, styles[`modalBackground${theme}`]]}
             openAnimationConfig={{ timing: { duration: 200 } }}
             closeAnimationConfig={{ timing: { duration: 500 } }}
         >
             <View style={styles.bottomSheetContainer}>
-                <Text style={styles.title}>Brand</Text>
+                <Text style={[styles.title, styles[`text${theme}`]]}>Brand</Text>
                 <View style={styles.brands}>
-                    <TouchableOpacity onPress={() => onBrandPressed('Star Wars')}>
-                        <Text style={brands.findIndex((e) => e === 'Star Wars') !== -1 ? { color: 'red' } : { color: 'black' }}>Star Wars</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => onBrandPressed('Marvel')}>
-                        <Text style={brands.findIndex((e) => e === 'Marvel') !== -1 ? { color: 'red' } : { color: 'black' }}>Marvel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => onBrandPressed('Harry Potter')}>
-                        <Text style={brands.findIndex((e) => e === 'Harry Potter') !== -1 ? { color: 'red' } : { color: 'black' }}>Harry Potter</Text>
-                    </TouchableOpacity>
+                    {brandsList.map((brand) => {
+                        return (
+                            <View key={brand}>
+                                <TouchableOpacity
+                                    onPress={() => onBrandPressed(brand)}
+                                    style={[styles.brand, isInBrands(brand) && styles.selectedBrand]}
+                                    activeOpacity={1}
+                                >
+                                    <Text style={isInBrands(brand) ? styles.textDark : styles[`text${theme}`]}>
+                                        {brand}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )
+                    })}
                 </View>
-                <Text style={styles.title}>Ages</Text>
+                <Text style={[styles.title, styles[`text${theme}`]]}>Ages</Text>
+                <View style={styles.slideValues}>
+                    <Text style={styles[`text${theme}`]}>{ages[0]}</Text>
+                    <Text style={styles[`text${theme}`]}>{ages[1]}</Text>
+                </View>
                 <Slider
                     value={ages}
                     onValueChange={(value) => setAges(value)}
@@ -162,9 +180,17 @@ const FilterPanel = ({ filterPanelRef }) => {
                     trackMarks={[5, 10, 15]}
                     renderTrackMarkComponent={() => <View style={styles.mark} />}
                     onSlidingComplete={() => onSlidingComplete('ages')}
+                    thumbTintColor="#5F7ADB"
+                    maximumTrackTintColor="#d3d3d3"
+                    minimumTrackTintColor={lightMode.primary}
+                    trackClickable
+                    animateTransitions
                 />
-                <Text>{`${ages[0]} - ${ages[1]}`}</Text>
-                <Text style={styles.title}>Price</Text>
+                <Text style={[styles.title, styles[`text${theme}`]]}>Price</Text>
+                <View style={styles.slideValues}>
+                    <Text style={styles[`text${theme}`]}>{prices[0]}</Text>
+                    <Text style={styles[`text${theme}`]}>{prices[1]}</Text>
+                </View>
                 <Slider
                     value={prices}
                     onValueChange={(value) => setPrices(value)}
@@ -172,14 +198,28 @@ const FilterPanel = ({ filterPanelRef }) => {
                     maximumValue={1699}
                     step={1}
                     onSlidingComplete={() => onSlidingComplete('prices')}
+                    thumbTintColor="#5F7ADB"
+                    maximumTrackTintColor="#d3d3d3"
+                    minimumTrackTintColor={lightMode.primary}
+                    trackClickable
+                    animateTransitions
                 />
-                <Text>{`${prices[0]} - ${prices[1]}`}</Text>
-                <TouchableOpacity onPress={onApplyFilters}>
-                    <Text>Apply</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={onClearFilters}>
-                    <Text>Clear</Text>
-                </TouchableOpacity>
+                <View style={styles.buttons}>
+                    <TouchableOpacity
+                        onPress={onClearFilters}
+                        style={[styles.button, styles.unfill]}
+                        activeOpacity={1}
+                    >
+                        <Text style={styles[`text${theme}`]}>Clear</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={onApplyFilters}
+                        style={[styles.button, styles.fill]}
+                        activeOpacity={1}
+                    >
+                        <Text style={styles.textDark}>Apply</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </Modalize>
     )
@@ -190,13 +230,30 @@ export default FilterPanel;
 const styles = StyleSheet.create({
     bottomSheetContainer: {
         height: '100%',
-        paddingTop: 25,
-        paddingBottom: 15,
-        paddingHorizontal: 15
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+    },
+    modalStyle: {
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20
+    },
+    modalBackgroundLight: {
+        backgroundColor: lightMode.background
+    },
+    modalBackgroundDark: {
+        backgroundColor: darkMode.background
+    },
+    textLight: {
+        color: lightMode.text
+    },
+    textDark: {
+        color: darkMode.text
     },
     title: {
         fontWeight: 'bold',
-        fontSize: 17
+        fontSize: 17,
+        marginBottom: 10,
+        letterSpacing: 1
     },
     brands: {
         flexDirection: 'row',
@@ -204,10 +261,51 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexWrap: 'wrap'
     },
+    brand: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 25,
+        borderWidth: 2,
+        borderColor: lightMode.primary,
+        paddingHorizontal: 15,
+        paddingVertical: 7,
+        marginBottom: 10,
+        marginRight: 10,
+        elevation: 1
+    },
+    selectedBrand: {
+        backgroundColor: lightMode.primary
+    },
+    slideValues: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
     mark: {
         width: 8,
         height: 8,
         borderRadius: 2,
-        backgroundColor: 'blue'
+        backgroundColor: lightMode.primary
+    },
+    buttons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 10
+    },
+    button: {
+        width: '48%',
+        height: 37,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 25,
+        elevation: 1
+    },
+    fill: {
+        backgroundColor: lightMode.primary
+    },
+    unfill: {
+        borderWidth: 2,
+        borderColor: lightMode.primary
     }
 });
