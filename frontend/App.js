@@ -4,8 +4,10 @@ import { StripeProvider } from '@stripe/stripe-react-native';
 import { I18nManager, LogBox } from "react-native";
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
+import Toast from 'react-native-toast-message';
 import { AppNavigator } from './src/components';
 import { ThemeProvider } from './src/utils/ThemeManager';
+import { toastConfig } from './src/utils/toastConfig';
 import rootReducer from './src/redux/reducers';
 import config from './src/utils/config';
 
@@ -23,6 +25,7 @@ export default function App() {
                     <AppNavigator />
                 </ThemeProvider>
             </StripeProvider>
+            <Toast config={toastConfig} />
         </Provider>
     );
 }

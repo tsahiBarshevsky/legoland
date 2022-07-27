@@ -2,9 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import * as Animatable from 'react-native-animatable';
-import { Feather, AntDesign, Entypo } from '@expo/vector-icons';
+import { Feather, AntDesign, Entypo, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 import { addNewProductToCart, updateProductInCart } from '../../redux/actions/cart';
 import { addNewProductToWishList, removeProductFromWishList } from '../../redux/actions/wishList';
 import { localhost } from '../../utils/utilities';
@@ -78,6 +79,19 @@ const ProductScreen = ({ route }) => {
         }
     }
 
+    const notify = () => {
+        Toast.show({
+            type: 'cartToast',
+            position: 'bottom',
+            bottomOffset: 25,
+            props: {
+                quantity: quantity,
+                image: product.image,
+                theme: theme
+            }
+        });
+    }
+
     const onAddNewProductToCart = () => {
         const editMode = cart.products.findIndex((p) => p.catalogNumber === product.catalogNumber) !== -1;
         if (!editMode) {
@@ -107,6 +121,9 @@ const ProductScreen = ({ route }) => {
                 .finally(() => {
                     dispatch(addNewProductToCart(newProduct, newSum));
                     navigation.goBack();
+                    setTimeout(() => {
+                        notify();
+                    }, 500);
                 });
         }
         else {
@@ -130,8 +147,20 @@ const ProductScreen = ({ route }) => {
                 .finally(() => {
                     dispatch(updateProductInCart(index, quantity, 'increment', product.price));
                     navigation.goBack();
+                    setTimeout(() => {
+                        notify();
+                    }, 200);
                 });
         }
+    }
+
+    const renderStock = () => {
+        if (product.stock > 10)
+            return `In${"\n"}stock`;
+        else
+            if (product.stock > 0)
+                return `Low${"\n"}stock`;
+        return `Out${"\n"}of stock`;
     }
 
     useEffect(() => {
@@ -150,7 +179,7 @@ const ProductScreen = ({ route }) => {
         <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Entypo name="chevron-left" size={24} color="black" />
+                    <Entypo name="chevron-left" size={24} style={styles[`icon${theme}`]} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onAddNewProductToWishList}>
                     {inWishList ?
@@ -173,7 +202,7 @@ const ProductScreen = ({ route }) => {
             >
                 <View style={styles.about}>
                     <Animatable.Text
-                        style={styles.name}
+                        style={[styles.name, styles[`text${theme}`]]}
                         animation='fadeInLeft'
                         delay={DURATION}
                     >
@@ -182,17 +211,66 @@ const ProductScreen = ({ route }) => {
                     <Animatable.Text
                         animation='fadeInRight'
                         delay={DURATION * 2}
+                        style={styles[`text${theme}`]}
                     >
                         {product.price}₪
                     </Animatable.Text>
                 </View>
-                <Text>{product.catalogNumber}</Text>
-                <Text>{product.ages}+</Text>
-                <Text>{product.pieces}</Text>
+                <View style={styles.details}>
+                    <Animatable.View
+                        animation='zoomIn'
+                        delay={DURATION + 100}
+                        style={styles.detail}
+                    >
+                        <View style={styles.iconWrapper}>
+                            <FontAwesome5 name="hashtag" size={16} style={styles[`icon${theme}`]} />
+                        </View>
+                        <Text style={styles[`text${theme}`]}>{product.catalogNumber}</Text>
+                    </Animatable.View>
+                    <View style={[styles.separator, styles[`separatorColor${theme}`]]} />
+                    <Animatable.View
+                        animation='zoomIn'
+                        delay={DURATION + 200}
+                        style={styles.detail}
+                    >
+                        <View style={styles.iconWrapper}>
+                            <MaterialIcons name="cake" size={18} style={styles[`icon${theme}`]} />
+                        </View>
+                        <Text style={styles[`text${theme}`]}>{product.ages}+</Text>
+                    </Animatable.View>
+                    <View style={[styles.separator, styles[`separatorColor${theme}`]]} />
+                    <Animatable.View
+                        animation='zoomIn'
+                        delay={DURATION + 300}
+                        style={styles.detail}
+                    >
+                        <View style={styles.iconWrapper}>
+                            <MaterialCommunityIcons name="toy-brick" size={20} style={styles[`icon${theme}`]} />
+                        </View>
+                        <Text style={styles[`text${theme}`]}>{product.pieces}</Text>
+                    </Animatable.View>
+                    <View style={[styles.separator, styles[`separatorColor${theme}`]]} />
+                    <Animatable.View
+                        animation='zoomIn'
+                        delay={DURATION + 400}
+                        style={styles.detail}
+                    >
+                        <View style={styles.iconWrapper}>
+                            {product.stock > 0 ?
+                                <Entypo name="check" size={20} style={styles[`icon${theme}`]} />
+                                :
+                                <AntDesign name="close" size={20} style={styles[`icon${theme}`]} />
+                            }
+                        </View>
+                        <Text style={[styles.stock, styles[`text${theme}`]]}>
+                            {renderStock()}
+                        </Text>
+                    </Animatable.View>
+                </View>
                 <Animatable.Text
                     animation='fadeIn'
                     delay={DURATION * 3}
-                    style={styles.description}
+                    style={[styles.description, styles[`text${theme}`]]}
                 >
                     {product.description}
                 </Animatable.Text>
@@ -203,19 +281,26 @@ const ProductScreen = ({ route }) => {
                 delay={DURATION * 4}
             >
                 <View style={styles.quantity}>
-                    <TouchableOpacity onPress={increment}>
-                        <Feather name="plus" size={15} color="black" />
+                    <TouchableOpacity
+                        onPress={increment}
+                        disabled={product.stock === 0}
+                    >
+                        <Feather name="plus" size={15} style={styles[`icon${theme}`]} />
                     </TouchableOpacity>
-                    <Text>{quantity}</Text>
-                    <TouchableOpacity onPress={decrement}>
-                        <Feather name="minus" size={15} color="black" />
+                    <Text style={styles[`text${theme}`]}>{quantity}</Text>
+                    <TouchableOpacity
+                        onPress={decrement}
+                        disabled={product.stock === 0}
+                    >
+                        <Feather name="minus" size={15} style={styles[`icon${theme}`]} />
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity
                     onPress={onAddNewProductToCart}
+                    disabled={product.stock === 0}
                     style={styles.button}
                 >
-                    <Text style={{ color: 'white' }}>Add to cart</Text>
+                    <Text style={styles.buttonCaption}>Add to cart!</Text>
                 </TouchableOpacity>
             </Animatable.View>
         </SafeAreaView>
@@ -247,6 +332,18 @@ const styles = StyleSheet.create({
     containerDark: {
         backgroundColor: darkMode.background
     },
+    textLight: {
+        color: lightMode.text
+    },
+    textDark: {
+        color: darkMode.text
+    },
+    iconLight: {
+        color: lightMode.text
+    },
+    iconDark: {
+        color: darkMode.text
+    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -266,15 +363,53 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         marginBottom: 10
     },
+    details: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        width: '100%',
+        marginBottom: 5
+    },
+    detail: {
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    iconWrapper: {
+        width: 30,
+        height: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 3
+    },
+    stock: {
+        fontSize: 13,
+        lineHeight: 15,
+        textAlign: 'center'
+    },
+    separator: {
+        width: 1,
+        height: '50%',
+        borderRadius: 0.5,
+        alignSelf: 'center',
+        marginHorizontal: 10
+    },
+    separatorColorLight: {
+        backgroundColor: 'rgba(0, 0, 0, 0.25)'
+    },
+    separatorColorDark: {
+        backgroundColor: 'rgba(255, 255, 255, 0.25)'
+    },
     name: {
         fontSize: 20,
         fontWeight: 'bold',
+        flexShrink: 1,
+        marginRight: 10
     },
     contentContainerStyle: {
         paddingHorizontal: 15,
     },
     description: {
-        flexGrow: 1
+        flexShrink: 1
     },
     cartOptions: {
         flexDirection: 'row',
@@ -287,8 +422,13 @@ const styles = StyleSheet.create({
         height: 37,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#2c3e50',
+        backgroundColor: '#5F7ADB',
         borderRadius: 25
+    },
+    buttonCaption: {
+        color: 'white',
+        fontWeight: 'bold',
+        textTransform: 'capitalize'
     },
     quantity: {
         width: '48%',
@@ -297,7 +437,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#2c3e50',
+        borderColor: '#5F7ADB',
         borderRadius: 25,
         paddingHorizontal: 10
     }
