@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { ThemeContext } from '../../utils/ThemeManager';
+import { lightMode, darkMode } from '../../utils/themes';
 
 const Filters = ({ filterPanelRef }) => {
+    const { theme } = useContext(ThemeContext);
     const [filter, setFilter] = useState('');
     const navigation = useNavigation();
 
@@ -17,22 +20,23 @@ const Filters = ({ filterPanelRef }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, styles[`container${theme}`]]}>
             <TextInput
                 value={filter}
                 placeholder="Search for a Lego set..."
                 onChangeText={(text) => setFilter(text)}
                 underlineColorAndroid="transparent"
-                // placeholderTextColor={placeholder}
-                // selectionColor={placeholder}
+                placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
                 onSubmitEditing={onSearch}
                 returnKeyType='search'
                 blurOnSubmit={false}
-                style={styles.textInput}
+                style={[styles.textInput, styles[`textInput${theme}`]]}
             />
             <TouchableOpacity
                 onPress={() => filterPanelRef.current?.open()}
                 style={styles.button}
+                activeOpacity={1}
             >
                 <Ionicons name="filter" size={20} color="white" />
             </TouchableOpacity>
@@ -47,24 +51,35 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: 'white',
         borderRadius: 25,
         paddingVertical: 5,
-        paddingLeft: 12,
+        paddingLeft: 15,
         paddingRight: 5,
         marginHorizontal: 15,
         marginBottom: 15
     },
+    containerLight: {
+        backgroundColor: lightMode.boxes
+    },
+    containerDark: {
+        backgroundColor: darkMode.boxes
+    },
     textInput: {
         flex: 1,
         marginRight: 10
+    },
+    textInputLight: {
+        color: lightMode.text
+    },
+    textInputDark: {
+        color: darkMode.text
     },
     button: {
         height: 35,
         width: 35,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#2c3e50',
+        backgroundColor: lightMode.primary,
         borderRadius: 35 / 2
     }
 });

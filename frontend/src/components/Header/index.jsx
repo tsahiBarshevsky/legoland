@@ -1,32 +1,31 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { authentication } from '../../utils/firebase';
+import { ThemeContext } from '../../utils/ThemeManager';
+import { lightMode, darkMode } from '../../utils/themes';
 
 const Header = ({ cart, bottomSheetRef }) => {
+    const { theme } = useContext(ThemeContext);
     const navigation = useNavigation();
 
     return (
-        <>
-            <View style={styles.container}>
-                <TouchableOpacity onPress={() => bottomSheetRef.current?.open()}>
-                    <Feather name="menu" size={24} color="black" />
-                </TouchableOpacity>
-                <Text>{authentication.currentUser.email}</Text>
-                <TouchableOpacity
-                    onPress={() => navigation.navigate('Cart')}
-                    style={styles.button}
-                >
-                    <Feather name="shopping-cart" size={24} color="black" />
-                    {cart.products.length > 0 &&
-                        <View style={styles.badge}>
-                            <Text style={styles.caption}>{cart.products.length}</Text>
-                        </View>
-                    }
-                </TouchableOpacity>
-            </View>
-        </>
+        <View style={[styles.container]}>
+            <TouchableOpacity onPress={() => bottomSheetRef.current?.open()}>
+                <Feather name="menu" size={24} color={theme === 'Light' ? "black" : "white"} />
+            </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('Cart')}
+                style={styles.button}
+            >
+                <Feather name="shopping-cart" size={24} color={theme === 'Light' ? "black" : "white"} />
+                {cart.products.length > 0 &&
+                    <View style={[styles.badge, styles[`badgeBorder${theme}`]]}>
+                        <Text style={styles.caption}>{cart.products.length}</Text>
+                    </View>
+                }
+            </TouchableOpacity>
+        </View>
     )
 }
 
@@ -55,10 +54,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'red',
         borderWidth: 2,
-        borderColor: '#f5f5f5'
+    },
+    badgeBorderLight: {
+        borderColor: lightMode.background
+    },
+    badgeBorderDark: {
+        borderColor: darkMode.background
     },
     caption: {
         color: 'white',
-        fontSize: 9
+        fontSize: 9,
+        transform: [{ translateY: -1 }]
     }
 });

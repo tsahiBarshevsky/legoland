@@ -1,11 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
 import { StyleSheet, Platform, StatusBar, View, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { BottomSheet, FilterPanel, Filters, Header, ProductCard } from '../../components';
-import moment from 'moment';
+import { ThemeContext } from '../../utils/ThemeManager';
+import { darkMode, lightMode } from '../../utils/themes';
 
 const HomeScreen = () => {
+    const { theme } = useContext(ThemeContext);
     const cart = useSelector(state => state.cart);
     const products = useSelector(state => state.products);
     const filterPanelRef = useRef(null);
@@ -13,7 +15,7 @@ const HomeScreen = () => {
 
     return (
         <>
-            <View style={styles.container}>
+            <View style={[styles.container, styles[`container${theme}`]]}>
                 <ScrollView keyboardShouldPersistTaps='handled'>
                     <Header
                         cart={cart}
@@ -48,11 +50,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-        backgroundColor: '#f5f5f5',
-        // paddingHorizontal: 15
+    },
+    containerLight: {
+        backgroundColor: lightMode.background
+    },
+    containerDark: {
+        backgroundColor: darkMode.background
     },
     contentContainerStyle: {
-        // marginHorizontal: 15,
         marginBottom: 5,
         paddingHorizontal: 15,
         alignSelf: 'stretch'
