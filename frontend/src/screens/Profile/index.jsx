@@ -182,7 +182,7 @@ const ProfileScreen = () => {
                             <View style={[styles.iconWrapper, styles.green]}>
                                 <AntDesign name="logout" size={15} color="#47a559" />
                             </View>
-                            <Text style={styles.settingsTitle}>Logout</Text>
+                            <Text style={styles.settingsTitle}>Sign Out</Text>
                         </View>
                         <View style={styles.wrapper}>
                             <Entypo name="chevron-small-right" size={20} color="grey" />
