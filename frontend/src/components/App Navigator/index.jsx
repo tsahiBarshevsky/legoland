@@ -9,6 +9,7 @@ import {
     CheckoutScreen,
     HomeScreen,
     LoginScreen,
+    OrdersScreen,
     PersonalDetailsScreen,
     ProductScreen,
     ProfileScreen,
@@ -91,6 +92,11 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name='WishList'
                     component={WishListScreen}
+                    options={options}
+                />
+                <Stack.Screen
+                    name='Orders'
+                    component={OrdersScreen}
                     options={options}
                 />
             </Stack.Navigator>

@@ -56,10 +56,6 @@ const ProfileScreen = () => {
         })
     }
 
-    const Separator = () => (
-        <View style={styles.separator} />
-    )
-
     useEffect(() => {
         getIsUsinSystemScheme().then((systemScheme) => setIsUsinSystemScheme(systemScheme));
     }, []);
@@ -170,7 +166,9 @@ const ProfileScreen = () => {
                             })}
                             {orders.length > 2 &&
                                 <TouchableOpacity
+                                    onPress={() => navigation.navigate('Orders')}
                                     style={[styles.editButton, { marginTop: 10 }]}
+                                    activeOpacity={1}
                                 >
                                     <Text style={styles.textDark}>View All Orders</Text>
                                 </TouchableOpacity>

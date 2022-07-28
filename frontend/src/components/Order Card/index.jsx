@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     },
     flatList: {
         marginTop: 10,
-        marginBottom: 5
+        marginBottom: 7
     },
     imageWrapper: {
         justifyContent: 'center',

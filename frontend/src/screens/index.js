@@ -10,3 +10,4 @@ export { default as ProfileScreen } from './Profile';
 export { default as AddressScreen } from './Address';
 export { default as PersonalDetailsScreen } from './Personal Details';
 export { default as WishListScreen } from './Wish List';
+export { default as OrdersScreen } from './Orders';
