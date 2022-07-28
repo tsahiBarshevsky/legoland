@@ -172,7 +172,7 @@ app.post('/add-new-order', async (req, res) => {
         products: req.body.products,
         sum: req.body.sum,
         address: req.body.address,
-        firstName: req.body.firsName,
+        firstName: req.body.firstName,
         lastName: req.body.lastName,
         phone: req.body.phone,
         paymentConfirmation: req.body.paymentConfirmation

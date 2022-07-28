@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 import { ThemeContext } from '../../utils/ThemeManager';
 import { darkMode, lightMode } from '../../utils/themes';
 
@@ -10,11 +11,13 @@ import {
     View,
     FlatList,
     Image,
+    TouchableOpacity,
 } from 'react-native';
 
 const OrderCard = ({ order }) => {
     const { theme } = useContext(ThemeContext);
     const products = useSelector(state => state.products);
+    const navigation = useNavigation();
 
     const getImageLink = (item) => {
         return products.find((e) => e.catalogNumber === item.catalogNumber).image;
@@ -29,7 +32,10 @@ const OrderCard = ({ order }) => {
     }
 
     return (
-        <View>
+        <TouchableOpacity
+            onPress={() => navigation.navigate('Order', { order })}
+            activeOpacity={1}
+        >
             <View style={styles.status}>
                 <View style={styles.circle} />
                 <Text style={styles[`text${theme}`]}>Paid</Text>
@@ -61,7 +67,7 @@ const OrderCard = ({ order }) => {
                 </Text>
                 <Text style={styles[`text${theme}`]}>Total: {order.sum}₪</Text>
             </View>
-        </View>
+        </TouchableOpacity>
     )
 }
 

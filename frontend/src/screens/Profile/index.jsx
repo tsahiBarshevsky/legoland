@@ -35,10 +35,6 @@ const ProfileScreen = () => {
     const navigation = useNavigation();
     const themeSelectorRef = useRef();
 
-    const getImageLink = (item) => {
-        return products.find((e) => e.catalogNumber === item.catalogNumber).image;
-    }
-
     const onEditPersonalDetails = () => {
         navigation.navigate('PersonalDetails', {
             firstName: user.firstName,
