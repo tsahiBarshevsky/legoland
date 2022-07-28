@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Modalize } from 'react-native-modalize';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
@@ -8,6 +8,9 @@ import { setIsUsinSystemScheme as updateIsUsingSystemScheme } from '../../utils/
 
 const ThemeSelector = ({ themeSelectorRef, isUsinSystemScheme, setIsUsinSystemScheme }) => {
     const { theme, toggleTheme } = useContext(ThemeContext);
+    const [touchLight, setTouchLight] = useState(false);
+    const [touchDark, setTouchDark] = useState(false);
+    const [touchSystem, setTouchSystem] = useState(false);
 
     const onChangeTheme = (newTheme) => {
         themeSelectorRef.current?.close();
@@ -38,7 +41,9 @@ const ThemeSelector = ({ themeSelectorRef, isUsinSystemScheme, setIsUsinSystemSc
                 <Text style={[styles.title, styles[`text${theme}`]]}>Select theme</Text>
                 <TouchableOpacity
                     onPress={() => onChangeTheme('Light')}
-                    style={styles.button}
+                    onPressIn={() => setTouchLight(true)}
+                    onPressOut={() => setTouchLight(false)}
+                    style={[styles.button, touchLight && styles[`touch${theme}`]]}
                     activeOpacity={1}
                 >
                     <View style={styles.wrapper}>
@@ -53,7 +58,9 @@ const ThemeSelector = ({ themeSelectorRef, isUsinSystemScheme, setIsUsinSystemSc
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => onChangeTheme('Dark')}
-                    style={styles.button}
+                    onPressIn={() => setTouchDark(true)}
+                    onPressOut={() => setTouchDark(false)}
+                    style={[styles.button, touchDark && styles[`touch${theme}`]]}
                     activeOpacity={1}
                 >
                     <View style={styles.wrapper}>
@@ -68,7 +75,9 @@ const ThemeSelector = ({ themeSelectorRef, isUsinSystemScheme, setIsUsinSystemSc
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => onChangeTheme('System')}
-                    style={styles.button}
+                    onPressIn={() => setTouchSystem(true)}
+                    onPressOut={() => setTouchSystem(false)}
+                    style={[styles.button, touchSystem && styles[`touch${theme}`]]}
                     activeOpacity={1}
                 >
                     <View style={styles.wrapper}>
@@ -92,7 +101,6 @@ const styles = StyleSheet.create({
     bottomSheetContainer: {
         height: '100%',
         paddingVertical: 10,
-        paddingHorizontal: 15,
     },
     modalStyle: {
         borderTopLeftRadius: 20,
@@ -114,14 +122,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 17,
         marginBottom: 15,
-        letterSpacing: 1
+        letterSpacing: 1,
+        paddingHorizontal: 15
     },
     button: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginVertical: 5,
-        paddingHorizontal: 5
+        marginBottom: 5,
+        paddingHorizontal: 15,
+        paddingVertical: 5
     },
     wrapper: {
         flexDirection: 'row',
@@ -134,5 +144,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 20
-    }
+    },
+    touchLight: {
+        backgroundColor: 'rgba(73, 69, 69, 0.1)'
+    },
+    touchDark: {
+        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+    },
 });

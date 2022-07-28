@@ -8,3 +8,4 @@ export { default as Checkbox } from './Checkbox';
 export { default as ThemeSelector } from './Theme Selector';
 export { default as CartToast } from './Cart Toast';
 export { default as CartItem } from './Cart Item';
+export { default as OrderCard } from './Order Card';

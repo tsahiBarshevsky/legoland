@@ -4,7 +4,7 @@ import moment from 'moment';
 import { AntDesign, Feather, Ionicons, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 import { ThemeContext } from '../../utils/ThemeManager';
-import { ThemeSelector } from '../../components';
+import { OrderCard, ThemeSelector } from '../../components';
 import { getIsUsinSystemScheme } from '../../utils/AsyncStorageHandler';
 import { darkMode, lightMode } from '../../utils/themes';
 import { authentication } from '../../utils/firebase';
@@ -146,48 +146,37 @@ const ProfileScreen = () => {
                             </View>
                         }
                     </View>
-                    {/* <View style={styles.subtitleWrapper}>
-                        <Feather name="package" size={24}  style={[styles.icon, styles[`icon${theme}`]]} />
+                    <View style={styles.subtitleWrapper}>
+                        <Feather name="package" size={24} style={[styles.icon, styles[`icon${theme}`]]} />
                         <Text style={[styles.subtitle, styles[`text${theme}`]]}>My orders</Text>
                     </View>
-                    <View style={[styles.box, styles[`box${theme}`]]}>
-                        <FlatList
-                            data={orders.length < 2 ? orders : orders.slice(0, 2)}
-                            keyExtractor={(item) => item.orderNumber}
-                            scrollEnabled={false}
-                            renderItem={({ item }) => {
+                    {orders.length === 0 ?
+                        <View style={[styles.box, styles[`box${theme}`]]}>
+                            <Text style={[styles[`text${theme}`], { marginVertical: 5 }]}>
+                                No orders history
+                            </Text>
+                        </View>
+                        :
+                        <View style={[styles.box, styles[`box${theme}`]]}>
+                            {orders.slice(0, 2).map((order, index) => {
                                 return (
-                                    <View>
-                                        <Text>#{item.orderNumber}</Text>
-                                        <Text>{moment(item.date).format('DD/MM/YY HH:mm')}</Text>
-                                        <Text>{item.sum}₪</Text>
-                                        <FlatList
-                                            data={item.products}
-                                            horizontal
-                                            scrollEnabled={false}
-                                            keyExtractor={(item) => item.catalogNumber}
-                                            renderItem={({ item }) => {
-                                                return (
-                                                    <Image
-                                                        source={{ uri: getImageLink(item) }}
-                                                        resizeMode='center'
-                                                        style={{ width: 40, height: 40 }}
-                                                    />
-                                                )
-                                            }}
-                                            ItemSeparatorComponent={() => <View style={{ marginHorizontal: 5 }} />}
-                                        />
+                                    <View key={order.orderNumber}>
+                                        <OrderCard order={order} />
+                                        {orders.slice(0, 2).length - 1 !== index &&
+                                            <View style={[styles.separator, styles[`separator${theme}`]]} />
+                                        }
                                     </View>
                                 )
-                            }}
-                            ItemSeparatorComponent={Separator}
-                        />
-                        {orders.length > 2 &&
-                            <TouchableOpacity style={styles.button}>
-                                <Text>See all orders</Text>
-                            </TouchableOpacity>
-                        }
-                    </View> */}
+                            })}
+                            {orders.length > 2 &&
+                                <TouchableOpacity
+                                    style={[styles.editButton, { marginTop: 10 }]}
+                                >
+                                    <Text style={styles.textDark}>View All Orders</Text>
+                                </TouchableOpacity>
+                            }
+                        </View>
+                    }
                     <View style={styles.subtitleWrapper}>
                         <Ionicons name="settings-outline" size={20} style={[styles.icon, styles[`icon${theme}`]]} />
                         <Text style={[styles.subtitle, styles[`text${theme}`]]}>Settings</Text>
@@ -294,7 +283,6 @@ const styles = StyleSheet.create({
         color: darkMode.text
     },
     box: {
-        backgroundColor: 'white',
         borderRadius: 15,
         paddingHorizontal: 10,
         paddingVertical: 7,
@@ -370,5 +358,17 @@ const styles = StyleSheet.create({
     },
     touchDark: {
         backgroundColor: 'rgba(255, 255, 255, 0.1)'
-    }
+    },
+    separator: {
+        height: 1,
+        width: '100%',
+        borderRadius: 2,
+        marginVertical: 10,
+    },
+    separatorLight: {
+        backgroundColor: 'rgba(0, 0, 0, 0.4)'
+    },
+    separatorDark: {
+        backgroundColor: 'rgba(255, 255, 255, 0.4)'
+    },
 });
