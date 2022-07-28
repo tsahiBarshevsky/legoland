@@ -24,10 +24,10 @@ const BottomSheet = ({ bottomSheetRef }) => {
 
     const onSignOut = () => {
         bottomSheetRef.current?.close();
-        // setTimeout(() => {
-        //     signOut(authentication);
-        //     navigation.replace('Login');
-        // }, 500);
+        setTimeout(() => {
+            signOut(authentication);
+            navigation.replace('Login');
+        }, 500);
     }
 
     return (

@@ -2,8 +2,9 @@ import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import TouchableScale from 'react-native-touchable-scale';
 import { Entypo } from '@expo/vector-icons'
+import { darkMode, lightMode } from '../../utils/themes';
 
-const Checkbox = ({ checked, setChecked, caption }) => {
+const Checkbox = ({ checked, setChecked, caption, theme }) => {
     return (
         <View style={styles.container}>
             <TouchableScale
@@ -14,7 +15,7 @@ const Checkbox = ({ checked, setChecked, caption }) => {
             >
                 {checked && <Entypo name="check" size={13} color='white' />}
             </TouchableScale>
-            <Text style={styles.cpation}>{caption}</Text>
+            <Text style={[styles.cpation, styles[`caption${theme}`]]}>{caption}</Text>
         </View>
     )
 }
@@ -26,24 +27,31 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        marginVertical: 10
+        marginVertical: 10,
+        paddingHorizontal: 5
     },
     button: {
         width: 25,
         height: 25,
         borderWidth: 1,
         borderRadius: 25 / 2,
-        borderColor: '#2c3e50',
+        borderColor: lightMode.primary,
         justifyContent: 'center',
         alignItems: 'center'
     },
     checked: {
-        backgroundColor: '#2c3e50'
+        backgroundColor: lightMode.primary
     },
     unchecked: {
         backgroundColor: 'transparent'
     },
     cpation: {
         paddingLeft: 10
+    },
+    captionLight: {
+        color: lightMode.text
+    },
+    captionDark: {
+        color: darkMode.text
     }
 });

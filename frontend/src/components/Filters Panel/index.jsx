@@ -92,7 +92,7 @@ const FilterPanel = ({ filterPanelRef }) => {
             case (!brandsApply && !agesApply && pricesApply):
                 type = 'prices';
                 break;
-            // #8 - FFF (handle inside render)
+            // #8 - FFF
             default:
                 type = 'none';
                 break;
