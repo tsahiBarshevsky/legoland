@@ -47,7 +47,7 @@ const WishListScreen = () => {
                         style={styles.emptyWishlistButton}
                         activeOpacity={1}
                     >
-                        <Text style={styles.emptyWishlistButtonCaption}>Start Shopping</Text>
+                        <Text style={styles.emptyWishlistButtonCaption}>Start Exploring</Text>
                     </TouchableOpacity>
                 </View>
             }

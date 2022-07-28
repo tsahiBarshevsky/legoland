@@ -7,6 +7,8 @@ import { ThemeContext } from '../../utils/ThemeManager';
 import { ThemeSelector } from '../../components';
 import { getIsUsinSystemScheme } from '../../utils/AsyncStorageHandler';
 import { darkMode, lightMode } from '../../utils/themes';
+import { authentication } from '../../utils/firebase';
+import { signOut } from 'firebase/auth';
 
 // React Native Components
 import {
@@ -25,6 +27,8 @@ import {
 const ProfileScreen = () => {
     const { theme } = useContext(ThemeContext);
     const [isUsinSystemScheme, setIsUsinSystemScheme] = useState('false');
+    const [touchAppearance, setTouchAppearance] = useState(false);
+    const [touchSignout, setTouchSignout] = useState(false);
     const user = useSelector(state => state.user);
     const products = useSelector(state => state.products);
     const orders = useSelector(state => state.orders);
@@ -44,6 +48,14 @@ const ProfileScreen = () => {
         });
     }
 
+    const onSignOut = () => {
+        signOut(authentication);
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }]
+        })
+    }
+
     const Separator = () => (
         <View style={styles.separator} />
     )
@@ -56,66 +68,89 @@ const ProfileScreen = () => {
         <>
             <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
                 <ScrollView contentContainerStyle={styles.contentContainerStyle}>
-                    <View style={styles.titleWrapper}>
-                        <AntDesign name="user" size={24} color="black" style={styles.icon} />
-                        <Text style={styles.title}>My details</Text>
+                    <Text style={[styles.title, styles[`text${theme}`]]}>My Profile</Text>
+                    <View style={styles.subtitleWrapper}>
+                        <AntDesign name="user" size={24} style={[styles.icon, styles[`icon${theme}`]]} />
+                        <Text style={[styles.subtitle, styles[`text${theme}`]]}>My details</Text>
                     </View>
-                    <View style={styles.box}>
-                        <Text>{user.firstName} {user.lastName}</Text>
-                        <Text>{user.email}</Text>
-                        <Text>{user.phone}</Text>
-                        <TouchableOpacity onPress={onEditPersonalDetails}>
-                            <Text>Edit</Text>
+                    <View style={[styles.box, styles[`box${theme}`]]}>
+                        <Text style={styles[`text${theme}`]}>{user.firstName} {user.lastName}</Text>
+                        <Text style={styles[`text${theme}`]}>{user.email}</Text>
+                        <Text style={styles[`text${theme}`]}>{user.phone}</Text>
+                        <TouchableOpacity
+                            onPress={onEditPersonalDetails}
+                            style={styles.editButton}
+                            activeOpacity={1}
+                        >
+                            <Text style={styles.textDark}>Edit</Text>
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.titleWrapper}>
-                        <Ionicons name="location-sharp" size={24} color="black" style={styles.icon} />
-                        <Text style={styles.title}>My Addresses</Text>
+                    <View style={styles.subtitleWrapper}>
+                        <Ionicons name="location-sharp" size={24} style={[styles.icon, styles[`icon${theme}`]]} />
+                        <Text style={[styles.subtitle, styles[`text${theme}`]]}>My Addresses</Text>
                     </View>
-                    <View style={styles.box}>
+                    <View style={[styles.box, styles[`box${theme}`]]}>
                         {Object.keys(user.addresses).length === 0 ?
                             <View>
-                                <Text>There's no addresses</Text>
-                                <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}>
-                                    <Text>Add primary address</Text>
+                                <Text style={[styles[`text${theme}`], { marginBottom: 10 }]}>
+                                    You haven't added addresses
+                                </Text>
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}
+                                    style={styles.editButton}
+                                    activeOpacity={1}
+                                >
+                                    <Text style={styles.textDark}>Add primary address</Text>
                                 </TouchableOpacity>
                             </View>
                             :
                             <View>
-                                <Text>Primary address</Text>
+                                <Text style={[styles.address, styles[`text${theme}`]]}>Primary address</Text>
                                 {user.addresses.primary &&
                                     <View style={{ marginBottom: 10 }}>
-                                        <Text>{user.addresses.primary.street}, {user.addresses.primary.city}</Text>
-                                        <Text>Apartment {user.addresses.primary.house}</Text>
-                                        <Text>{user.addresses.primary.floor} Floor</Text>
-                                        <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}>
-                                            <Text>Edit address</Text>
+                                        <Text style={styles[`text${theme}`]}>{user.addresses.primary.street}, {user.addresses.primary.city}</Text>
+                                        <Text style={styles[`text${theme}`]}>Apartment {user.addresses.primary.house}</Text>
+                                        <Text style={styles[`text${theme}`]}>{user.addresses.primary.floor} Floor</Text>
+                                        <TouchableOpacity
+                                            onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}
+                                            style={styles.editButton}
+                                            activeOpacity={1}
+                                        >
+                                            <Text style={styles.textDark}>Edit</Text>
                                         </TouchableOpacity>
                                     </View>
                                 }
                                 {user.addresses.secondary ?
                                     <View>
-                                        <Text>Secondary address</Text>
-                                        <Text>{user.addresses.secondary.street}, {user.addresses.secondary.city}</Text>
-                                        <Text>Apartment {user.addresses.secondary.house}</Text>
-                                        <Text>{user.addresses.secondary.floor} Floor</Text>
-                                        <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}>
-                                            <Text>Edit address</Text>
+                                        <Text style={[styles.address, styles[`text${theme}`]]}>Secondary address</Text>
+                                        <Text style={styles[`text${theme}`]}>{user.addresses.secondary.street}, {user.addresses.secondary.city}</Text>
+                                        <Text style={styles[`text${theme}`]}>Apartment {user.addresses.secondary.house}</Text>
+                                        <Text style={styles[`text${theme}`]}>{user.addresses.secondary.floor} Floor</Text>
+                                        <TouchableOpacity
+                                            onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}
+                                            style={styles.editButton}
+                                            activeOpacity={1}
+                                        >
+                                            <Text style={styles.textDark}>Edit</Text>
                                         </TouchableOpacity>
                                     </View>
                                     :
-                                    <TouchableOpacity onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}>
-                                        <Text>Add secondary address</Text>
+                                    <TouchableOpacity
+                                        onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}
+                                        style={styles.editButton}
+                                        activeOpacity={1}
+                                    >
+                                        <Text style={styles.textDark}>Add secondary address</Text>
                                     </TouchableOpacity>
                                 }
                             </View>
                         }
                     </View>
-                    <View style={styles.titleWrapper}>
-                        <Feather name="package" size={24} color="black" style={styles.icon} />
-                        <Text style={styles.title}>My orders</Text>
+                    {/* <View style={styles.subtitleWrapper}>
+                        <Feather name="package" size={24}  style={[styles.icon, styles[`icon${theme}`]]} />
+                        <Text style={[styles.subtitle, styles[`text${theme}`]]}>My orders</Text>
                     </View>
-                    <View style={styles.box}>
+                    <View style={[styles.box, styles[`box${theme}`]]}>
                         <FlatList
                             data={orders.length < 2 ? orders : orders.slice(0, 2)}
                             keyExtractor={(item) => item.orderNumber}
@@ -152,37 +187,47 @@ const ProfileScreen = () => {
                                 <Text>See all orders</Text>
                             </TouchableOpacity>
                         }
-                    </View>
-                    <View style={styles.titleWrapper}>
-                        <Ionicons name="settings-outline" size={20} color="black" style={styles.icon} />
-                        <Text style={styles.title}>Settings</Text>
+                    </View> */}
+                    <View style={styles.subtitleWrapper}>
+                        <Ionicons name="settings-outline" size={20} style={[styles.icon, styles[`icon${theme}`]]} />
+                        <Text style={[styles.subtitle, styles[`text${theme}`]]}>Settings</Text>
                     </View>
                     <TouchableOpacity
                         onPress={() => themeSelectorRef.current?.open()}
-                        style={styles.settings}
+                        onPressIn={() => setTouchAppearance(true)}
+                        onPressOut={() => setTouchAppearance(false)}
+                        style={[styles.settings, touchAppearance && styles[`touch${theme}`]]}
                         activeOpacity={1}
                     >
                         <View style={styles.wrapper}>
                             <View style={[styles.iconWrapper, styles.blue]}>
                                 <MaterialCommunityIcons name="theme-light-dark" size={18} color="#80adce" />
                             </View>
-                            <Text style={styles.settingsTitle}>Appearance</Text>
+                            <Text style={[styles.settingsTitle, styles[`text${theme}`]]}>
+                                Appearance
+                            </Text>
                         </View>
                         <View style={styles.wrapper}>
-                            <Text style={styles.theme}>{theme}</Text>
+                            <Text style={styles.theme}>
+                                {isUsinSystemScheme === 'true' ? 'System' : theme}
+                            </Text>
                             <Entypo name="chevron-small-right" size={20} color="grey" />
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => console.log('open modal')}
-                        style={styles.settings}
+                        onPress={onSignOut}
+                        onPressIn={() => setTouchSignout(true)}
+                        onPressOut={() => setTouchSignout(false)}
+                        style={[styles.settings, touchSignout && styles[`touch${theme}`]]}
                         activeOpacity={1}
                     >
                         <View style={styles.wrapper}>
                             <View style={[styles.iconWrapper, styles.green]}>
                                 <AntDesign name="logout" size={15} color="#47a559" />
                             </View>
-                            <Text style={styles.settingsTitle}>Sign Out</Text>
+                            <Text style={[styles.settingsTitle, styles[`text${theme}`]]}>
+                                Sign Out
+                            </Text>
                         </View>
                         <View style={styles.wrapper}>
                             <Entypo name="chevron-small-right" size={20} color="grey" />
@@ -213,29 +258,67 @@ const styles = StyleSheet.create({
         backgroundColor: darkMode.background
     },
     contentContainerStyle: {
-        paddingHorizontal: 15,
         paddingBottom: 5
     },
-    titleWrapper: {
+    subtitleWrapper: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        marginBottom: 5
+        marginBottom: 5,
+        paddingHorizontal: 15
+    },
+    subtitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 2
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        paddingHorizontal: 15
+    },
+    textLight: {
+        color: lightMode.text
+    },
+    textDark: {
+        color: darkMode.text
     },
     icon: {
         marginRight: 5
     },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 2
+    iconLight: {
+        color: lightMode.text
+    },
+    iconDark: {
+        color: darkMode.text
     },
     box: {
         backgroundColor: 'white',
         borderRadius: 15,
         paddingHorizontal: 10,
         paddingVertical: 7,
-        marginBottom: 15
+        marginBottom: 15,
+        elevation: 1,
+        marginHorizontal: 15
+    },
+    boxLight: {
+        backgroundColor: lightMode.boxes
+    },
+    boxDark: {
+        backgroundColor: darkMode.boxes
+    },
+    address: {
+        fontWeight: 'bold',
+        marginBottom: 5
+    },
+    editButton: {
+        backgroundColor: lightMode.primary,
+        borderRadius: 25,
+        paddingHorizontal: 24,
+        paddingVertical: 5,
+        alignSelf: 'flex-end',
+        elevation: 1
     },
     separator: {
         height: 1,
@@ -250,7 +333,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10
+        marginBottom: 5,
+        paddingHorizontal: 15,
+        paddingVertical: 5
     },
     settingsTitle: {
         fontWeight: 'bold',
@@ -279,5 +364,11 @@ const styles = StyleSheet.create({
         color: 'grey',
         transform: [{ translateY: -1.5 }],
         marginRight: 5
+    },
+    touchLight: {
+        backgroundColor: 'rgba(73, 69, 69, 0.1)'
+    },
+    touchDark: {
+        backgroundColor: 'rgba(255, 255, 255, 0.1)'
     }
 });
