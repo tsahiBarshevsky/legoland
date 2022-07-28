@@ -1,8 +1,9 @@
 import React, { useState, useRef, useContext } from 'react';
 import * as Progress from 'react-native-progress';
 import { useNavigation } from '@react-navigation/native'
-import { Formik } from 'formik';
+import { Formik, ErrorMessage } from 'formik';
 import update from 'immutability-helper';
+import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { CardField, useConfirmPayment } from '@stripe/stripe-react-native';
 import { Checkbox } from '../../components';
@@ -13,6 +14,7 @@ import { emptyCart } from '../../redux/actions/cart';
 import { updateStock } from '../../redux/actions/products';
 import { authentication } from '../../utils/firebase';
 import { ThemeContext } from '../../utils/ThemeManager';
+import { personalDetailsSchema, addressSchema } from '../../utils/schemas';
 
 // React Native components
 import {
@@ -273,6 +275,7 @@ const CheckoutScreen = ({ route }) => {
                                     email: user.email,
                                     phone: user.phone
                                 }}
+                                validationSchema={personalDetailsSchema}
                                 enableReinitialize
                                 onSubmit={(values) => {
                                     setPersonalDetails(update(personalDetails, {
@@ -305,6 +308,17 @@ const CheckoutScreen = ({ route }) => {
                                                     style={[styles.textInput, styles[`textInput${theme}`]]}
                                                 />
                                             </View>
+                                            <ErrorMessage
+                                                name='firstName'
+                                                render={(message) => {
+                                                    return (
+                                                        <View style={styles.errorContainer}>
+                                                            <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                            <Text style={styles.error}>{message}</Text>
+                                                        </View>
+                                                    )
+                                                }}
+                                            />
                                             <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Last Name</Text>
                                             <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
                                                 <TextInput
@@ -322,6 +336,17 @@ const CheckoutScreen = ({ route }) => {
                                                     style={[styles.textInput, styles[`textInput${theme}`]]}
                                                 />
                                             </View>
+                                            <ErrorMessage
+                                                name='lastName'
+                                                render={(message) => {
+                                                    return (
+                                                        <View style={styles.errorContainer}>
+                                                            <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                            <Text style={styles.error}>{message}</Text>
+                                                        </View>
+                                                    )
+                                                }}
+                                            />
                                             <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Email</Text>
                                             <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
                                                 <TextInput
@@ -340,6 +365,17 @@ const CheckoutScreen = ({ route }) => {
                                                     style={[styles.textInput, styles[`textInput${theme}`]]}
                                                 />
                                             </View>
+                                            <ErrorMessage
+                                                name='email'
+                                                render={(message) => {
+                                                    return (
+                                                        <View style={styles.errorContainer}>
+                                                            <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                            <Text style={styles.error}>{message}</Text>
+                                                        </View>
+                                                    )
+                                                }}
+                                            />
                                             <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Phone Number</Text>
                                             <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
                                                 <TextInput
@@ -357,8 +393,19 @@ const CheckoutScreen = ({ route }) => {
                                                     style={[styles.textInput, styles[`textInput${theme}`]]}
                                                 />
                                             </View>
+                                            <ErrorMessage
+                                                name='phone'
+                                                render={(message) => {
+                                                    return (
+                                                        <View style={styles.errorContainer}>
+                                                            <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                            <Text style={styles.error}>{message}</Text>
+                                                        </View>
+                                                    )
+                                                }}
+                                            />
                                             <TouchableOpacity
-                                                onPress={nextScreen}
+                                                onPress={handleSubmit}
                                             // style={styles.button}
                                             >
                                                 <Text>Next</Text>
@@ -385,6 +432,7 @@ const CheckoutScreen = ({ route }) => {
                             >
                                 <Formik
                                     initialValues={initialValues}
+                                    validationSchema={addressSchema}
                                     enableReinitialize
                                     onSubmit={(values) => {
                                         setShippingDetails(update(shippingDetails, {
@@ -396,9 +444,10 @@ const CheckoutScreen = ({ route }) => {
                                     {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
                                         return (
                                             <View>
+                                                <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>City</Text>
                                                 <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
                                                     <TextInput
-                                                        placeholder='City...'
+                                                        placeholder='Which city do you live?'
                                                         value={values.city}
                                                         onChangeText={handleChange('city')}
                                                         style={[styles.textInput, styles[`textInput${theme}`]]}
@@ -411,9 +460,21 @@ const CheckoutScreen = ({ route }) => {
                                                         onSubmitEditing={() => streetRef.current?.focus()}
                                                     />
                                                 </View>
+                                                <ErrorMessage
+                                                    name='city'
+                                                    render={(message) => {
+                                                        return (
+                                                            <View style={styles.errorContainer}>
+                                                                <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                                <Text style={styles.error}>{message}</Text>
+                                                            </View>
+                                                        )
+                                                    }}
+                                                />
+                                                <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Street</Text>
                                                 <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
                                                     <TextInput
-                                                        placeholder='Street...'
+                                                        placeholder="What's your street?"
                                                         value={values.street}
                                                         ref={streetRef}
                                                         onChangeText={handleChange('street')}
@@ -427,9 +488,21 @@ const CheckoutScreen = ({ route }) => {
                                                         onSubmitEditing={() => houseRef.current?.focus()}
                                                     />
                                                 </View>
+                                                <ErrorMessage
+                                                    name='street'
+                                                    render={(message) => {
+                                                        return (
+                                                            <View style={styles.errorContainer}>
+                                                                <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                                <Text style={styles.error}>{message}</Text>
+                                                            </View>
+                                                        )
+                                                    }}
+                                                />
+                                                <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>House Number</Text>
                                                 <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
                                                     <TextInput
-                                                        placeholder='House...'
+                                                        placeholder="What's your house number?"
                                                         value={values.house}
                                                         ref={houseRef}
                                                         onChangeText={handleChange('house')}
@@ -444,9 +517,21 @@ const CheckoutScreen = ({ route }) => {
                                                         keyboardType='numeric'
                                                     />
                                                 </View>
+                                                <ErrorMessage
+                                                    name='house'
+                                                    render={(message) => {
+                                                        return (
+                                                            <View style={styles.errorContainer}>
+                                                                <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                                <Text style={styles.error}>{message}</Text>
+                                                            </View>
+                                                        )
+                                                    }}
+                                                />
+                                                <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Floor number</Text>
                                                 <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
                                                     <TextInput
-                                                        placeholder='Floor number...'
+                                                        placeholder='Which floor do you live?'
                                                         value={values.floor}
                                                         ref={floorRef}
                                                         onChangeText={handleChange('floor')}
@@ -459,28 +544,39 @@ const CheckoutScreen = ({ route }) => {
                                                         keyboardType='numeric'
                                                     />
                                                 </View>
+                                                <ErrorMessage
+                                                    name='floor'
+                                                    render={(message) => {
+                                                        return (
+                                                            <View style={styles.errorContainer}>
+                                                                <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                                <Text style={styles.error}>{message}</Text>
+                                                            </View>
+                                                        )
+                                                    }}
+                                                />
+                                                <Checkbox
+                                                    checked={saveAddress}
+                                                    setChecked={setSaveAddress}
+                                                    caption='Save as primary address'
+                                                    theme={theme}
+                                                />
+                                                <TouchableOpacity
+                                                    onPress={handleSubmit}
+                                                // style={styles.button}
+                                                >
+                                                    <Text>Next</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    onPress={previousScreen}
+                                                // style={styles.button}
+                                                >
+                                                    <Text>Previous</Text>
+                                                </TouchableOpacity>
                                             </View>
                                         )
                                     }}
                                 </Formik>
-                                <Checkbox
-                                    checked={saveAddress}
-                                    setChecked={setSaveAddress}
-                                    caption='Save as primary address'
-                                    theme={theme}
-                                />
-                                <TouchableOpacity
-                                    onPress={nextScreen}
-                                // style={styles.button}
-                                >
-                                    <Text>Next</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={previousScreen}
-                                // style={styles.button}
-                                >
-                                    <Text>Previous</Text>
-                                </TouchableOpacity>
                             </KeyboardAvoidingView>
                         </ScrollView>
                         :
@@ -629,14 +725,14 @@ const styles = StyleSheet.create({
     textInputTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        marginBottom: 5
+        marginTop: 10
     },
     textInputWrapper: {
         backgroundColor: 'white',
         borderRadius: 25,
         paddingHorizontal: 15,
         paddingVertical: 5,
-        marginBottom: 15
+        marginTop: 5
     },
     textInputWrapperLight: {
         backgroundColor: lightMode.boxes
@@ -759,5 +855,17 @@ const styles = StyleSheet.create({
     },
     separatorDark: {
         backgroundColor: 'rgba(255, 255, 255, 0.4)'
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 3
+    },
+    errorIcon: {
+        marginRight: 5
+    },
+    error: {
+        color: '#b71c1c',
+        fontWeight: 'bold'
     },
 });

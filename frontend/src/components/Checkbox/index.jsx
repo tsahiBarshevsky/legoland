@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import TouchableScale from 'react-native-touchable-scale';
 import { Entypo } from '@expo/vector-icons'
 import { darkMode, lightMode } from '../../utils/themes';
