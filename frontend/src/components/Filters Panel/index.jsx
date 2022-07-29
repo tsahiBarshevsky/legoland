@@ -14,6 +14,7 @@ const defaultPrices = [179, 1699];
 
 const FilterPanel = ({ filterPanelRef }) => {
     const { theme } = useContext(ThemeContext);
+    const [filters, setFilters] = useState(0);
     const [brands, setBrands] = useState([]);
     const [ages, setAges] = useState(defaultAges);
     const [prices, setPrices] = useState(defaultPrices);
@@ -57,6 +58,7 @@ const FilterPanel = ({ filterPanelRef }) => {
                 setAgesApply(false);
                 setPrices(defaultPrices);
                 setPricesApply(false);
+                setFilters(0);
                 filterPanelRef.current?.close();
             });
     }
@@ -135,6 +137,35 @@ const FilterPanel = ({ filterPanelRef }) => {
         else
             setBrandsApply(true);
     }, [brands]);
+
+    useEffect(() => {
+        switch (true) {
+            case (brandsApply && agesApply && pricesApply):
+                setFilters(3);
+                break;
+            case (brandsApply && agesApply && !pricesApply):
+                setFilters(2);
+                break;
+            case (brandsApply && !agesApply && pricesApply):
+                setFilters(2);
+                break;
+            case (brandsApply && !agesApply && !pricesApply):
+                setFilters(1);
+                break;
+            case (!brandsApply && agesApply && pricesApply):
+                setFilters(2);
+                break;
+            case (!brandsApply && agesApply && !pricesApply):
+                setFilters(1);
+                break;
+            case (!brandsApply && !agesApply && pricesApply):
+                setFilters(1);
+                break;
+            default:
+                setFilters(0);
+                break;
+        }
+    }, [brandsApply, agesApply, pricesApply]);
 
     return (
         <Modalize
@@ -216,8 +247,9 @@ const FilterPanel = ({ filterPanelRef }) => {
                         onPress={onApplyFilters}
                         style={[styles.button, styles.fill]}
                         activeOpacity={1}
+                        disabled={filters === 0}
                     >
-                        <Text style={styles.textDark}>Apply</Text>
+                        <Text style={styles.textDark}>Apply {filters} Apply</Text>
                     </TouchableOpacity>
                 </View>
             </View>
