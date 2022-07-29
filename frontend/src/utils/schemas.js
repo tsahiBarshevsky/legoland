@@ -11,6 +11,12 @@ const personalDetailsSchema = Yup.object().shape({
     phone: Yup.string().matches(phoneRegex, "Phone number isn't valid").required(required)
 });
 
+const personalDetailsSchemaV2 = Yup.object().shape({
+    firstName: Yup.string().trim().required(required),
+    lastName: Yup.string().trim().required(required),
+    phone: Yup.string().matches(phoneRegex, "Phone number isn't valid").required(required)
+});
+
 const addressSchema = Yup.object().shape({
     city: Yup.string().trim().required(required),
     street: Yup.string().trim().required(required),
@@ -20,5 +26,6 @@ const addressSchema = Yup.object().shape({
 
 export {
     personalDetailsSchema,
+    personalDetailsSchemaV2,
     addressSchema
 };

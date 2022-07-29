@@ -6,6 +6,7 @@ import update from 'immutability-helper';
 import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { CardField, useConfirmPayment } from '@stripe/stripe-react-native';
+import { Entypo } from '@expo/vector-icons';
 import { Checkbox } from '../../components';
 import { localhost } from '../../utils/utilities';
 import { updateAddresses } from '../../redux/actions/user';
@@ -15,6 +16,7 @@ import { updateStock } from '../../redux/actions/products';
 import { authentication } from '../../utils/firebase';
 import { ThemeContext } from '../../utils/ThemeManager';
 import { personalDetailsSchema, addressSchema } from '../../utils/schemas';
+import { darkMode, lightMode } from '../../utils/themes';
 
 // React Native components
 import {
@@ -35,8 +37,6 @@ import {
     Image,
     ToastAndroid
 } from 'react-native';
-import { darkMode, lightMode } from '../../utils/themes';
-import { Entypo } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('screen');
 
@@ -694,7 +694,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-        backgroundColor: '#f5f5f5'
     },
     containerLight: {
         backgroundColor: lightMode.background

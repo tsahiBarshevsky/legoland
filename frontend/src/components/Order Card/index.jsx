@@ -41,26 +41,28 @@ const OrderCard = ({ order }) => {
                 <Text style={styles[`text${theme}`]}>Paid</Text>
             </View>
             <Text style={styles[`text${theme}`]}>Order #{order.orderNumber}</Text>
-            <FlatList
-                data={order.products}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                overScrollMode="never"
-                keyExtractor={(item) => item.catalogNumber}
-                renderItem={({ item }) => {
-                    return (
-                        <View style={styles.imageWrapper}>
-                            <Image
-                                source={{ uri: getImageLink(item) }}
-                                resizeMode='stretch'
-                                style={styles.image}
-                            />
-                        </View>
-                    )
-                }}
-                ItemSeparatorComponent={() => <View style={{ marginHorizontal: 5 }} />}
-                style={styles.flatList}
-            />
+            <View onStartShouldSetResponder={() => true}>
+                <FlatList
+                    data={order.products}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    overScrollMode="never"
+                    keyExtractor={(item) => item.catalogNumber}
+                    renderItem={({ item }) => {
+                        return (
+                            <View style={styles.imageWrapper}>
+                                <Image
+                                    source={{ uri: getImageLink(item) }}
+                                    resizeMode='stretch'
+                                    style={styles.image}
+                                />
+                            </View>
+                        )
+                    }}
+                    ItemSeparatorComponent={() => <View style={{ marginHorizontal: 5 }} />}
+                    style={styles.flatList}
+                />
+            </View>
             <View style={styles.summary}>
                 <Text style={[styles[`text${theme}`], { marginRight: 12 }]}>
                     {renderNumberOfItems()}

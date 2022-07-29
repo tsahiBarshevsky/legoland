@@ -88,11 +88,15 @@ const ProfileScreen = () => {
                                     You haven't added addresses
                                 </Text>
                                 <TouchableOpacity
-                                    onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}
+                                    onPress={() => navigation.navigate('Address', {
+                                        type: 'primary',
+                                        action: 'adding',
+                                        user: user
+                                    })}
                                     style={styles.editButton}
                                     activeOpacity={1}
                                 >
-                                    <Text style={styles.textDark}>Add primary address</Text>
+                                    <Text style={styles.textDark}>Add Primary Address</Text>
                                 </TouchableOpacity>
                             </View>
                             :
@@ -104,7 +108,11 @@ const ProfileScreen = () => {
                                         <Text style={styles[`text${theme}`]}>Apartment {user.addresses.primary.house}</Text>
                                         <Text style={styles[`text${theme}`]}>{user.addresses.primary.floor} Floor</Text>
                                         <TouchableOpacity
-                                            onPress={() => navigation.navigate('Address', { type: 'primary', user: user })}
+                                            onPress={() => navigation.navigate('Address', {
+                                                type: 'primary',
+                                                action: 'edit',
+                                                user: user
+                                            })}
                                             style={styles.editButton}
                                             activeOpacity={1}
                                         >
@@ -119,7 +127,11 @@ const ProfileScreen = () => {
                                         <Text style={styles[`text${theme}`]}>Apartment {user.addresses.secondary.house}</Text>
                                         <Text style={styles[`text${theme}`]}>{user.addresses.secondary.floor} Floor</Text>
                                         <TouchableOpacity
-                                            onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}
+                                            onPress={() => navigation.navigate('Address', {
+                                                type: 'secondary',
+                                                action: 'edit',
+                                                user: user
+                                            })}
                                             style={styles.editButton}
                                             activeOpacity={1}
                                         >
@@ -128,11 +140,15 @@ const ProfileScreen = () => {
                                     </View>
                                     :
                                     <TouchableOpacity
-                                        onPress={() => navigation.navigate('Address', { type: 'secondary', user: user })}
+                                        onPress={() => navigation.navigate('Address', {
+                                            type: 'secondary',
+                                            action: 'adding',
+                                            user: user
+                                        })}
                                         style={styles.editButton}
                                         activeOpacity={1}
                                     >
-                                        <Text style={styles.textDark}>Add secondary address</Text>
+                                        <Text style={styles.textDark}>Add Secondary Address</Text>
                                     </TouchableOpacity>
                                 }
                             </View>
