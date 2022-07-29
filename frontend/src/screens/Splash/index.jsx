@@ -27,10 +27,13 @@ const SplashScreen = () => {
             .then(([cart, products, user, orders, wishList]) => {
                 if (cart)
                     dispatch({ type: 'SET_CART', cart: cart });
+                if (user)
+                    dispatch({ type: 'SET_USER', user: user });
+                console.log('wishList', wishList)
+                if (wishList)
+                    dispatch({ type: 'SET_WISH_LIST', wishList: wishList });
                 dispatch({ type: 'SET_PRODUCTS', products: products.sort(sortByPrice) });
-                dispatch({ type: 'SET_USER', user: user });
                 dispatch({ type: 'SET_ORDERS', orders: orders });
-                dispatch({ type: 'SET_WISH_LIST', wishList: wishList });
             })
             .finally(() => navigation.replace('Home'));
     }, []);

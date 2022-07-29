@@ -193,9 +193,9 @@ app.post('/add-new-user', async (req, res) => {
     const newUser = new User({
         uid: req.body.uid,
         email: req.body.email,
-        phone: '',
-        firstName: '',
-        lastName: '',
+        phone: req.body.phone,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
         addresses: {
             primary: {},
             secondary: {}
@@ -206,10 +206,19 @@ app.post('/add-new-user', async (req, res) => {
         sum: 0,
         owner: req.body.uid
     });
+    const wishList = new WishList({
+        products: [],
+        owner: req.body.uid
+    });
     await newUser.save();
     await cart.save();
+    await wishList.save();
     console.log('User added successfully');
-    res.json(newUser._id);
+    res.json({
+        userID: newUser._id,
+        cartID: cart._id,
+        wishListID: wishList._id
+    });
 });
 
 // Update user's address

@@ -1,10 +1,14 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useRef, useState, useContext } from 'react';
+import { Formik, ErrorMessage } from 'formik';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
-import { MaterialIcons, Entypo, FontAwesome } from '@expo/vector-icons';
-import { authentication } from '../../utils/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useNavigation } from '@react-navigation/native';
 import { localhost } from '../../utils/utilities';
+import { ThemeContext } from '../../utils/ThemeManager';
+import { registrationSchema } from '../../utils/schemas';
+import { darkMode, lightMode } from '../../utils/themes';
+import { authentication } from '../../utils/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 // React Native components
 import {
@@ -22,16 +26,25 @@ import {
 } from 'react-native';
 
 const RegistrationScreen = () => {
+    const { theme } = useContext(ThemeContext);
     const [disabled, setDisabled] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [passwordVisibilty, setPasswordVisibilty] = useState(true);
     const passwordRef = useRef(null);
+    const firstNameRef = useRef(null);
+    const lastNameRef = useRef(null);
+    const phoneRef = useRef(null);
     const dispatch = useDispatch();
-    const navigation = useNavigation();
 
-    const onRegister = () => {
-        createUserWithEmailAndPassword(authentication, email.trim(), password)
+    const initialValues = {
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        phone: ''
+    }
+
+    const onRegister = (values) => {
+        createUserWithEmailAndPassword(authentication, values.email.trim(), values.password)
             .then(() => {
                 fetch(`http://${localhost}/add-new-user`,
                     {
@@ -42,120 +55,224 @@ const RegistrationScreen = () => {
                         },
                         body: JSON.stringify({
                             uid: authentication.currentUser.uid,
-                            email: email
+                            email: values.email,
+                            phone: values.phone,
+                            firstName: values.firstName,
+                            lastName: values.lastName,
                         })
                     })
-                    .then(res => res.json())
-                    .then(res => console.log(res))
-                    .catch(error => console.log(error.message))
-                    .finally(() => dispatch({
-                        type: 'SET_CART', cart: {
-                            owner: authentication.currentUser.uid,
-                            products: [],
-                            sum: 0
-                        }
-                    }));
+                    .then((res) => res.json())
+                    .then((res) => {
+                        dispatch({
+                            type: 'SET_CART', cart: {
+                                _id: res.cartID,
+                                owner: authentication.currentUser.uid,
+                                products: [],
+                                sum: 0
+                            }
+                        });
+                        dispatch({
+                            type: 'SET_USER', user: {
+                                _id: res.userID,
+                                uid: authentication.currentUser.uid,
+                                email: values.email,
+                                phone: values.phone,
+                                firstName: values.firstName,
+                                lastName: values.lastName,
+                                addresses: {
+                                    primary: {},
+                                    secondary: {}
+                                }
+                            }
+                        });
+                        dispatch({
+                            type: 'SET_WISH_LIST', wishList: {
+                                _id: res.wishListID,
+                                products: [],
+                                owner: authentication.currentUser.uid
+                            }
+                        });
+                    })
+                    .catch((error) => console.log(error.message))
             })
             .catch((error) => console.log(error.message));
     }
 
-    // useEffect(() => {
-    //     const unsubscribe = authentication.onAuthStateChanged((user) => {
-    //         if (user)
-    //             navigation.replace('Splash');
-    //     });
-    //     return unsubscribe;
-    // }, []);
-
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
             <ScrollView
+                keyboardShouldPersistTaps="always"
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 15 }}
-                keyboardShouldPersistTaps='handled'
             >
                 <KeyboardAvoidingView
                     enabled
                     behavior={Platform.OS === 'ios' ? 'padding' : null}
                 >
-                    <Text style={[styles.text, styles.route]}>Registration</Text>
-                    <Text style={[styles.text, styles.title]}>Email</Text>
-                    <View style={styles.textInputWrapper}>
-                        <MaterialIcons
-                            name="alternate-email"
-                            size={20}
-                            color="black"
-                            style={styles.icon}
-                        />
-                        <TextInput
-                            value={email}
-                            placeholder="what's your email?"
-                            onChangeText={(text) => setEmail(text)}
-                            keyboardType='email-address'
-                            underlineColorAndroid="transparent"
-                            // placeholderTextColor={placeholder}
-                            // selectionColor={placeholder}
-                            returnKeyType='next'
-                            onSubmitEditing={() => passwordRef.current.focus()}
-                            blurOnSubmit={false}
-                            style={styles.textInput}
-                        />
-                    </View>
-                    <Text style={[styles.text, styles.title]}>Password</Text>
-                    <View style={styles.textInputWrapper}>
-                        <Entypo
-                            name="lock"
-                            size={20}
-                            color="black"
-                            style={styles.icon}
-                        />
-                        <TextInput
-                            value={password}
-                            ref={passwordRef}
-                            placeholder="What's your password?"
-                            secureTextEntry={passwordVisibilty}
-                            onChangeText={(text) => setPassword(text)}
-                            underlineColorAndroid="transparent"
-                            // placeholderTextColor={placeholder}
-                            // selectionColor={placeholder}
-                            onSubmitEditing={() => onRegister()}
-                            style={styles.textInput}
-                        />
-                        <TouchableOpacity onPress={() => setPasswordVisibilty(!passwordVisibilty)}>
-                            {passwordVisibilty ?
-                                <FontAwesome
-                                    name="eye"
-                                    size={20}
-                                    color="rgba(0, 0, 0, 0.75)"
-                                    style={styles.eye}
-                                />
-                                :
-                                <FontAwesome
-                                    name="eye-slash"
-                                    size={20}
-                                    color="rgba(0, 0, 0, 0.75)"
-                                    style={styles.eye}
-                                />
-                            }
-                        </TouchableOpacity>
-                    </View>
-                    <TouchableOpacity
-                        onPress={onRegister}
-                        style={styles.button}
-                        // activeOpacity={0.8}
-                        disabled={disabled}
+                    <Text style={[styles.title, styles[`text${theme}`]]}>Registration</Text>
+                    <Formik
+                        initialValues={initialValues}
+                        validationSchema={registrationSchema}
+                        enableReinitialize
+                        onSubmit={(values) => onRegister(values)}
                     >
-                        <Text style={[styles.text, styles.buttonText]}>
-                            Register!
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => navigation.goBack()}
-                        style={styles.registration}
-                    // activeOpacity={1}
-                    >
-                        <Text style={styles.text}>Already have an account? Login</Text>
-                    </TouchableOpacity>
+                        {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
+                            return (
+                                <View style={{ paddingHorizontal: 15 }}>
+                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                        <TextInput
+                                            placeholder='Email...'
+                                            value={values.email}
+                                            onChangeText={handleChange('email')}
+                                            underlineColorAndroid="transparent"
+                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            blurOnSubmit={false}
+                                            onBlur={handleBlur('email')}
+                                            returnKeyType='next'
+                                            onSubmitEditing={() => passwordRef.current?.focus()}
+                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                        />
+                                    </View>
+                                    <ErrorMessage
+                                        name='email'
+                                        render={(message) => {
+                                            return (
+                                                <View style={styles.errorContainer}>
+                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                    <Text style={styles.error}>{message}</Text>
+                                                </View>
+                                            )
+                                        }}
+                                    />
+                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                        <TextInput
+                                            placeholder='Password...'
+                                            value={values.password}
+                                            ref={passwordRef}
+                                            onChangeText={handleChange('password')}
+                                            secureTextEntry={passwordVisibilty}
+                                            underlineColorAndroid="transparent"
+                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            blurOnSubmit={false}
+                                            onBlur={handleBlur('password')}
+                                            returnKeyType='next'
+                                            onSubmitEditing={() => firstNameRef.current?.focus()}
+                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                        />
+                                        <TouchableOpacity onPress={() => setPasswordVisibilty(!passwordVisibilty)}>
+                                            {passwordVisibilty ?
+                                                <FontAwesome
+                                                    name="eye"
+                                                    size={20}
+                                                    style={[styles.eye, styles[`eye${theme}`]]}
+                                                />
+                                                :
+                                                <FontAwesome
+                                                    name="eye-slash"
+                                                    size={20}
+                                                    style={[styles.eye, styles[`eye${theme}`]]}
+                                                />
+                                            }
+                                        </TouchableOpacity>
+                                    </View>
+                                    <ErrorMessage
+                                        name='password'
+                                        render={(message) => {
+                                            return (
+                                                <View style={styles.errorContainer}>
+                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                    <Text style={styles.error}>{message}</Text>
+                                                </View>
+                                            )
+                                        }}
+                                    />
+                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                        <TextInput
+                                            placeholder='First name...'
+                                            value={values.firstName}
+                                            ref={firstNameRef}
+                                            onChangeText={handleChange('firstName')}
+                                            underlineColorAndroid="transparent"
+                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            blurOnSubmit={false}
+                                            onBlur={handleBlur('firstName')}
+                                            returnKeyType='next'
+                                            onSubmitEditing={() => lastNameRef.current?.focus()}
+                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                        />
+                                    </View>
+                                    <ErrorMessage
+                                        name='firstName'
+                                        render={(message) => {
+                                            return (
+                                                <View style={styles.errorContainer}>
+                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                    <Text style={styles.error}>{message}</Text>
+                                                </View>
+                                            )
+                                        }}
+                                    />
+                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                        <TextInput
+                                            placeholder='Last name...'
+                                            value={values.lastName}
+                                            ref={lastNameRef}
+                                            onChangeText={handleChange('lastName')}
+                                            underlineColorAndroid="transparent"
+                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            blurOnSubmit={false}
+                                            onBlur={handleBlur('lastName')}
+                                            returnKeyType='next'
+                                            onSubmitEditing={() => phoneRef.current?.focus()}
+                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                        />
+                                    </View>
+                                    <ErrorMessage
+                                        name='lastName'
+                                        render={(message) => {
+                                            return (
+                                                <View style={styles.errorContainer}>
+                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                    <Text style={styles.error}>{message}</Text>
+                                                </View>
+                                            )
+                                        }}
+                                    />
+                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                        <TextInput
+                                            placeholder='Phone...'
+                                            value={values.phone}
+                                            ref={phoneRef}
+                                            onChangeText={handleChange('phone')}
+                                            underlineColorAndroid="transparent"
+                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                            onBlur={handleBlur('phone')}
+                                            onSubmitEditing={handleSubmit}
+                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                            keyboardType='number-pad'
+                                            maxLength={10}
+                                        />
+                                    </View>
+                                    <ErrorMessage
+                                        name='phone'
+                                        render={(message) => {
+                                            return (
+                                                <View style={styles.errorContainer}>
+                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                    <Text style={styles.error}>{message}</Text>
+                                                </View>
+                                            )
+                                        }}
+                                    />
+                                </View>
+                            )
+                        }}
+                    </Formik>
                 </KeyboardAvoidingView>
             </ScrollView>
         </SafeAreaView>
@@ -168,7 +285,72 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-        backgroundColor: '#f5f5f5',
+    },
+    containerLight: {
+        backgroundColor: lightMode.background
+    },
+    containerDark: {
+        backgroundColor: darkMode.background
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 15,
         paddingHorizontal: 15
+    },
+    textLight: {
+        color: lightMode.text
+    },
+    textDark: {
+        color: darkMode.text
+    },
+    textInputTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 10
+    },
+    textInputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 25,
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        marginTop: 5
+    },
+    textInputWrapperLight: {
+        backgroundColor: lightMode.boxes
+    },
+    textInputWrapperDark: {
+        backgroundColor: darkMode.boxes
+    },
+    textInput: {
+        flex: 1,
+    },
+    textInputLight: {
+        color: lightMode.text
+    },
+    textInputDark: {
+        color: darkMode.text
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 3
+    },
+    errorIcon: {
+        marginRight: 5
+    },
+    error: {
+        color: '#b71c1c',
+        fontWeight: 'bold'
+    },
+    eye: {
+        marginLeft: 10
+    },
+    eyeLight: {
+        color: 'rgba(0, 0, 0, 0.75)'
+    },
+    eyeDark: {
+        color: 'rgba(255, 255, 255, 0.75)'
     }
 });
