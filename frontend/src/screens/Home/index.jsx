@@ -1,4 +1,5 @@
 import React, { useRef, useContext } from 'react';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { StyleSheet, Platform, StatusBar, View, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
 import MasonryList from '@react-native-seoul/masonry-list';
@@ -15,6 +16,7 @@ const HomeScreen = () => {
 
     return (
         <>
+            <ExpoStatusBar style={theme === 'Light' ? 'dark' : 'light'} />
             <View style={[styles.container, styles[`container${theme}`]]}>
                 <ScrollView keyboardShouldPersistTaps='handled'>
                     <Header

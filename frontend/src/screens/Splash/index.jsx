@@ -1,11 +1,16 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useContext, useEffect } from 'react';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
+import { StyleSheet, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
+import { BallIndicator } from 'react-native-indicators';
 import { localhost, sortByPrice } from '../../utils/utilities';
 import { authentication } from '../../utils/firebase';
+import { ThemeContext } from '../../utils/ThemeManager';
+import { lightMode, darkMode } from '../../utils/themes';
 
 const SplashScreen = () => {
+    const { theme } = useContext(ThemeContext);
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
@@ -38,9 +43,12 @@ const SplashScreen = () => {
     }, []);
 
     return (
-        <View style={styles.container}>
-            <Text>Loading...</Text>
-        </View>
+        <>
+            <ExpoStatusBar style={theme === 'Light' ? 'dark' : 'light'} />
+            <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
+                <BallIndicator size={30} count={8} color={theme === 'Light' ? 'black' : 'white'} />
+            </SafeAreaView>
+        </>
     )
 }
 
@@ -49,8 +57,13 @@ export default SplashScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    containerLight: {
+        backgroundColor: lightMode.background
+    },
+    containerDark: {
+        backgroundColor: darkMode.background
     }
 });

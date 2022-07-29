@@ -50,59 +50,62 @@ const RegistrationScreen = () => {
 
     const onRegister = (values) => {
         setDisabled(true);
-        createUserWithEmailAndPassword(authentication, values.email.trim(), values.password)
-            .then(() => {
-                fetch(`http://${localhost}/add-new-user`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            uid: authentication.currentUser.uid,
-                            email: values.email,
-                            phone: values.phone,
-                            firstName: values.firstName,
-                            lastName: values.lastName,
-                        })
-                    })
-                    .then((res) => res.json())
-                    .then((res) => {
-                        dispatch({
-                            type: 'SET_CART', cart: {
-                                _id: res.cartID,
-                                owner: authentication.currentUser.uid,
-                                products: [],
-                                sum: 0
-                            }
-                        });
-                        dispatch({
-                            type: 'SET_USER', user: {
-                                _id: res.userID,
+        Keyboard.dismiss();
+        setTimeout(() => {
+            createUserWithEmailAndPassword(authentication, values.email.trim(), values.password)
+                .then(() => {
+                    fetch(`http://${localhost}/add-new-user`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
                                 uid: authentication.currentUser.uid,
                                 email: values.email,
                                 phone: values.phone,
                                 firstName: values.firstName,
                                 lastName: values.lastName,
-                                addresses: {
-                                    primary: {},
-                                    secondary: {}
+                            })
+                        })
+                        .then((res) => res.json())
+                        .then((res) => {
+                            dispatch({
+                                type: 'SET_CART', cart: {
+                                    _id: res.cartID,
+                                    owner: authentication.currentUser.uid,
+                                    products: [],
+                                    sum: 0
                                 }
-                            }
-                        });
-                        dispatch({
-                            type: 'SET_WISH_LIST', wishList: {
-                                _id: res.wishListID,
-                                products: [],
-                                owner: authentication.currentUser.uid
-                            }
-                        });
-                    })
-                    .catch((error) => console.log(error.message))
-                    .finally(() => setDisabled(false));
-            })
-            .catch((error) => console.log(error.message));
+                            });
+                            dispatch({
+                                type: 'SET_USER', user: {
+                                    _id: res.userID,
+                                    uid: authentication.currentUser.uid,
+                                    email: values.email,
+                                    phone: values.phone,
+                                    firstName: values.firstName,
+                                    lastName: values.lastName,
+                                    addresses: {
+                                        primary: {},
+                                        secondary: {}
+                                    }
+                                }
+                            });
+                            dispatch({
+                                type: 'SET_WISH_LIST', wishList: {
+                                    _id: res.wishListID,
+                                    products: [],
+                                    owner: authentication.currentUser.uid
+                                }
+                            });
+                        })
+                        .catch((error) => console.log(error.message))
+                        .finally(() => setDisabled(false));
+                })
+                .catch((error) => console.log(error.message));
+        }, 500);
     }
 
     useEffect(() => {
@@ -316,7 +319,7 @@ const RegistrationScreen = () => {
                     Already have an account?
                 </Text>
                 <TouchableOpacity
-                    activeOpacity={0.5}
+                    activeOpacity={0.85}
                     onPress={() => navigation.goBack()}
                 >
                     <Text style={[styles.link, styles[`text${theme}`]]}> Sign in</Text>

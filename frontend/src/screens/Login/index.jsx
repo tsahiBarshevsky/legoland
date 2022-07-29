@@ -1,10 +1,9 @@
 import React, { useRef, useState, useContext, useEffect } from 'react';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { Formik, ErrorMessage } from 'formik';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import { UIActivityIndicator } from 'react-native-indicators';
-import { localhost } from '../../utils/utilities';
+import { BallIndicator, UIActivityIndicator } from 'react-native-indicators';
 import { ThemeContext } from '../../utils/ThemeManager';
 import { loginSchema } from '../../utils/schemas';
 import { darkMode, lightMode } from '../../utils/themes';
@@ -29,6 +28,7 @@ import {
 
 const LoginScreen = () => {
     const { theme } = useContext(ThemeContext);
+    const [loaded, setLoaded] = useState(false);
     const [disabled, setDisabled] = useState(false);
     const [passwordVisibilty, setPasswordVisibilty] = useState(true);
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
@@ -43,15 +43,22 @@ const LoginScreen = () => {
 
     const onSignIn = (values) => {
         setDisabled(true);
-        signInWithEmailAndPassword(authentication, values.email.trim(), values.password)
-            .catch((error) => console.log(error.message))
-            .finally(() => setDisabled(false));
+        Keyboard.dismiss();
+        setTimeout(() => {
+            signInWithEmailAndPassword(authentication, values.email.trim(), values.password)
+                .catch((error) => console.log(error.message))
+                .finally(() => setDisabled(false));
+        }, 500);
     }
 
     useEffect(() => {
         const unsubscribe = authentication.onAuthStateChanged((user) => {
             if (user)
                 navigation.replace('Splash');
+            else
+                setTimeout(() => {
+                    setLoaded(true);
+                }, 1000);
         });
         return unsubscribe;
     }, []);
@@ -70,128 +77,138 @@ const LoginScreen = () => {
         };
     }, []);
 
-    return (
-        <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
-            <Logo theme={theme} />
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 15 }}
-                keyboardShouldPersistTaps='handled'
-            >
-                <KeyboardAvoidingView
-                    enabled
-                    behavior={Platform.OS === 'ios' ? 'padding' : null}
+    return loaded ? (
+        <>
+            <ExpoStatusBar style={theme === 'Light' ? 'dark' : 'light'} />
+            <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
+                <Logo theme={theme} />
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 15 }}
+                    keyboardShouldPersistTaps='handled'
                 >
-                    <Formik
-                        initialValues={initialValues}
-                        validationSchema={loginSchema}
-                        enableReinitialize
-                        onSubmit={(values) => onSignIn(values)}
-                        innerRef={formRef}
+                    <KeyboardAvoidingView
+                        enabled
+                        behavior={Platform.OS === 'ios' ? 'padding' : null}
                     >
-                        {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
-                            return (
-                                <View style={{ paddingHorizontal: 15 }}>
-                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
-                                        <TextInput
-                                            placeholder='Email...'
-                                            value={values.email}
-                                            onChangeText={handleChange('email')}
-                                            underlineColorAndroid="transparent"
-                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                            blurOnSubmit={false}
-                                            onBlur={handleBlur('email')}
-                                            returnKeyType='next'
-                                            onSubmitEditing={() => passwordRef.current?.focus()}
-                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                        <Formik
+                            initialValues={initialValues}
+                            validationSchema={loginSchema}
+                            enableReinitialize
+                            onSubmit={(values) => onSignIn(values)}
+                            innerRef={formRef}
+                        >
+                            {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
+                                return (
+                                    <View style={{ paddingHorizontal: 15 }}>
+                                        <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                            <TextInput
+                                                placeholder='Email...'
+                                                value={values.email}
+                                                onChangeText={handleChange('email')}
+                                                underlineColorAndroid="transparent"
+                                                placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                blurOnSubmit={false}
+                                                onBlur={handleBlur('email')}
+                                                returnKeyType='next'
+                                                onSubmitEditing={() => passwordRef.current?.focus()}
+                                                style={[styles.textInput, styles[`textInput${theme}`]]}
+                                            />
+                                        </View>
+                                        <ErrorMessage
+                                            name='email'
+                                            render={(message) => {
+                                                return (
+                                                    <View style={styles.errorContainer}>
+                                                        <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                        <Text style={styles.error}>{message}</Text>
+                                                    </View>
+                                                )
+                                            }}
+                                        />
+                                        <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                            <TextInput
+                                                placeholder='Password...'
+                                                value={values.password}
+                                                ref={passwordRef}
+                                                onChangeText={handleChange('password')}
+                                                secureTextEntry={passwordVisibilty}
+                                                underlineColorAndroid="transparent"
+                                                placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                blurOnSubmit={false}
+                                                onBlur={handleBlur('password')}
+                                                onSubmitEditing={handleSubmit}
+                                                style={[styles.textInput, styles[`textInput${theme}`]]}
+                                            />
+                                            <TouchableOpacity onPress={() => setPasswordVisibilty(!passwordVisibilty)}>
+                                                {passwordVisibilty ?
+                                                    <FontAwesome
+                                                        name="eye"
+                                                        size={20}
+                                                        style={[styles.eye, styles[`eye${theme}`]]}
+                                                    />
+                                                    :
+                                                    <FontAwesome
+                                                        name="eye-slash"
+                                                        size={20}
+                                                        style={[styles.eye, styles[`eye${theme}`]]}
+                                                    />
+                                                }
+                                            </TouchableOpacity>
+                                        </View>
+                                        <ErrorMessage
+                                            name='password'
+                                            render={(message) => {
+                                                return (
+                                                    <View style={styles.errorContainer}>
+                                                        <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                        <Text style={styles.error}>{message}</Text>
+                                                    </View>
+                                                )
+                                            }}
                                         />
                                     </View>
-                                    <ErrorMessage
-                                        name='email'
-                                        render={(message) => {
-                                            return (
-                                                <View style={styles.errorContainer}>
-                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
-                                                    <Text style={styles.error}>{message}</Text>
-                                                </View>
-                                            )
-                                        }}
-                                    />
-                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
-                                        <TextInput
-                                            placeholder='Password...'
-                                            value={values.password}
-                                            ref={passwordRef}
-                                            onChangeText={handleChange('password')}
-                                            secureTextEntry={passwordVisibilty}
-                                            underlineColorAndroid="transparent"
-                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                            blurOnSubmit={false}
-                                            onBlur={handleBlur('password')}
-                                            onSubmitEditing={handleSubmit}
-                                            style={[styles.textInput, styles[`textInput${theme}`]]}
-                                        />
-                                        <TouchableOpacity onPress={() => setPasswordVisibilty(!passwordVisibilty)}>
-                                            {passwordVisibilty ?
-                                                <FontAwesome
-                                                    name="eye"
-                                                    size={20}
-                                                    style={[styles.eye, styles[`eye${theme}`]]}
-                                                />
-                                                :
-                                                <FontAwesome
-                                                    name="eye-slash"
-                                                    size={20}
-                                                    style={[styles.eye, styles[`eye${theme}`]]}
-                                                />
-                                            }
-                                        </TouchableOpacity>
-                                    </View>
-                                    <ErrorMessage
-                                        name='password'
-                                        render={(message) => {
-                                            return (
-                                                <View style={styles.errorContainer}>
-                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
-                                                    <Text style={styles.error}>{message}</Text>
-                                                </View>
-                                            )
-                                        }}
-                                    />
-                                </View>
-                            )
-                        }}
-                    </Formik>
-                </KeyboardAvoidingView>
-            </ScrollView>
-            <TouchableOpacity
-                onPress={() => formRef.current?.handleSubmit()}
-                style={[styles.button, isKeyboardOpen && { display: 'none' }]}
-                activeOpacity={1}
-                disabled={disabled}
-            >
-                {disabled ?
-                    <UIActivityIndicator size={25} count={12} color='white' />
-                    :
-                    <Text style={[styles.textDark, styles.buttonCaption]}>
-                        Sign In!
-                    </Text>
-                }
-            </TouchableOpacity>
-            <View style={[styles.signUp, isKeyboardOpen && { display: 'none' }]}>
-                <Text style={styles[`text${theme}`]}>
-                    Doesn't have an account?
-                </Text>
+                                )
+                            }}
+                        </Formik>
+                    </KeyboardAvoidingView>
+                </ScrollView>
                 <TouchableOpacity
-                    activeOpacity={0.5}
-                    onPress={() => navigation.navigate('Registration')}
+                    onPress={() => formRef.current?.handleSubmit()}
+                    style={[styles.button, isKeyboardOpen && { display: 'none' }]}
+                    activeOpacity={1}
+                    disabled={disabled}
                 >
-                    <Text style={[styles.link, styles[`text${theme}`]]}> Sign up</Text>
+                    {disabled ?
+                        <UIActivityIndicator size={25} count={12} color='white' />
+                        :
+                        <Text style={[styles.textDark, styles.buttonCaption]}>
+                            Sign In!
+                        </Text>
+                    }
                 </TouchableOpacity>
-            </View>
-        </SafeAreaView>
+                <View style={[styles.signUp, isKeyboardOpen && { display: 'none' }]}>
+                    <Text style={styles[`text${theme}`]}>
+                        Doesn't have an account?
+                    </Text>
+                    <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={() => navigation.navigate('Registration')}
+                    >
+                        <Text style={[styles.link, styles[`text${theme}`]]}> Sign up</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        </>
+    ) : (
+        <>
+            <ExpoStatusBar style={theme === 'Light' ? 'dark' : 'light'} />
+            <SafeAreaView style={[styles.loadingContainer, styles[`container${theme}`]]}>
+                <BallIndicator size={30} count={8} color={theme === 'Light' ? 'black' : 'white'} />
+            </SafeAreaView>
+        </>
     )
 }
 
@@ -288,5 +305,10 @@ const styles = StyleSheet.create({
     },
     link: {
         fontWeight: 'bold'
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 });

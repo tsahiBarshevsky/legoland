@@ -1,6 +1,7 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
+import { CardStyleInterpolators } from '@react-navigation/stack';
 
 // App screens
 import {
@@ -20,20 +21,15 @@ import {
     WishListScreen,
 } from '../../screens';
 
-const options = { headerShown: false };
-
 const Stack = createSharedElementStackNavigator();
-const theme = {
-    ...DefaultTheme,
-    colors: {
-        ...DefaultTheme.colors,
-        background: '#f5f5f5'
-    }
-}
+const options = {
+    headerShown: false,
+    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS
+};
 
 const AppNavigator = () => {
     return (
-        <NavigationContainer theme={theme}>
+        <NavigationContainer>
             <Stack.Navigator initialRouteName='Login'>
                 <Stack.Screen
                     name='Registration'
@@ -48,17 +44,23 @@ const AppNavigator = () => {
                 <Stack.Screen
                     name='Splash'
                     component={SplashScreen}
-                    options={options}
+                    options={{
+                        headerShown: false,
+                        animationEnabled: false
+                    }}
                 />
                 <Stack.Screen
                     name='Home'
                     component={HomeScreen}
-                    options={options}
+                    options={{
+                        headerShown: false,
+                        animationEnabled: false
+                    }}
                 />
                 <Stack.Screen
                     name='Product'
                     component={ProductScreen}
-                    options={options}
+                    options={{ headerShown: false }}
                 />
                 <Stack.Screen
                     name='Cart'
