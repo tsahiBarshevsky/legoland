@@ -1,14 +1,16 @@
-import React, { useRef, useState, useContext } from 'react';
+import React, { useRef, useState, useContext, useEffect } from 'react';
 import { Formik, ErrorMessage } from 'formik';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
+import { UIActivityIndicator } from 'react-native-indicators';
 import { localhost } from '../../utils/utilities';
 import { ThemeContext } from '../../utils/ThemeManager';
 import { registrationSchema } from '../../utils/schemas';
 import { darkMode, lightMode } from '../../utils/themes';
 import { authentication } from '../../utils/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { Logo } from '../../components';
 
 // React Native components
 import {
@@ -29,11 +31,14 @@ const RegistrationScreen = () => {
     const { theme } = useContext(ThemeContext);
     const [disabled, setDisabled] = useState(false);
     const [passwordVisibilty, setPasswordVisibilty] = useState(true);
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+    const formRef = useRef(null);
     const passwordRef = useRef(null);
     const firstNameRef = useRef(null);
     const lastNameRef = useRef(null);
     const phoneRef = useRef(null);
     const dispatch = useDispatch();
+    const navigation = useNavigation();
 
     const initialValues = {
         email: '',
@@ -44,6 +49,7 @@ const RegistrationScreen = () => {
     }
 
     const onRegister = (values) => {
+        setDisabled(true);
         createUserWithEmailAndPassword(authentication, values.email.trim(), values.password)
             .then(() => {
                 fetch(`http://${localhost}/add-new-user`,
@@ -94,12 +100,28 @@ const RegistrationScreen = () => {
                         });
                     })
                     .catch((error) => console.log(error.message))
+                    .finally(() => setDisabled(false));
             })
             .catch((error) => console.log(error.message));
     }
 
+    useEffect(() => {
+        const keyboardOpenListener = Keyboard.addListener("keyboardDidShow", () =>
+            setIsKeyboardOpen(true)
+        );
+        const keyboardCloseListener = Keyboard.addListener("keyboardDidHide", () =>
+            setIsKeyboardOpen(false)
+        );
+
+        return () => {
+            if (keyboardOpenListener) keyboardOpenListener.remove();
+            if (keyboardCloseListener) keyboardCloseListener.remove();
+        };
+    }, []);
+
     return (
         <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
+            <Logo theme={theme} />
             <ScrollView
                 keyboardShouldPersistTaps="always"
                 showsVerticalScrollIndicator={false}
@@ -109,12 +131,12 @@ const RegistrationScreen = () => {
                     enabled
                     behavior={Platform.OS === 'ios' ? 'padding' : null}
                 >
-                    <Text style={[styles.title, styles[`text${theme}`]]}>Registration</Text>
                     <Formik
                         initialValues={initialValues}
                         validationSchema={registrationSchema}
                         enableReinitialize
                         onSubmit={(values) => onRegister(values)}
+                        innerRef={formRef}
                     >
                         {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
                             return (
@@ -275,6 +297,31 @@ const RegistrationScreen = () => {
                     </Formik>
                 </KeyboardAvoidingView>
             </ScrollView>
+            <TouchableOpacity
+                onPress={() => formRef.current?.handleSubmit()}
+                style={[styles.button, isKeyboardOpen && { display: 'none' }]}
+                activeOpacity={1}
+                disabled={disabled}
+            >
+                {disabled ?
+                    <UIActivityIndicator size={25} count={12} color='white' />
+                    :
+                    <Text style={[styles.textDark, styles.buttonCaption]}>
+                        Create An Account!
+                    </Text>
+                }
+            </TouchableOpacity>
+            <View style={[styles.signIn, isKeyboardOpen && { display: 'none' }]}>
+                <Text style={styles[`text${theme}`]}>
+                    Already have an account?
+                </Text>
+                <TouchableOpacity
+                    activeOpacity={0.5}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Text style={[styles.link, styles[`text${theme}`]]}> Sign in</Text>
+                </TouchableOpacity>
+            </View>
         </SafeAreaView>
     )
 }
@@ -291,12 +338,6 @@ const styles = StyleSheet.create({
     },
     containerDark: {
         backgroundColor: darkMode.background
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        paddingHorizontal: 15
     },
     textLight: {
         color: lightMode.text
@@ -315,7 +356,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         paddingHorizontal: 15,
         paddingVertical: 5,
-        marginTop: 5
+        marginTop: 10
     },
     textInputWrapperLight: {
         backgroundColor: lightMode.boxes
@@ -352,5 +393,32 @@ const styles = StyleSheet.create({
     },
     eyeDark: {
         color: 'rgba(255, 255, 255, 0.75)'
+    },
+    button: {
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: lightMode.primary,
+        borderRadius: 25,
+        marginTop: 10,
+        marginHorizontal: 15,
+        elevation: 1,
+        marginBottom: 5
+    },
+    buttonCaption: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        letterSpacing: 0.5
+    },
+    signIn: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 15
+    },
+    link: {
+        // color: primary,
+        fontWeight: 'bold'
     }
 });
