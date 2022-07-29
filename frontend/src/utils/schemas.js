@@ -12,6 +12,11 @@ const registrationSchema = Yup.object().shape({
     phone: Yup.string().matches(phoneRegex, "Phone number isn't valid").required(required)
 });
 
+const loginSchema = Yup.object().shape({
+    email: Yup.string().trim().matches(emailRegex, "Email isn't valid").required(required),
+    password: Yup.string().trim().min(6, 'Password must contains at least 6 characters').required(required),
+});
+
 const personalDetailsSchema = Yup.object().shape({
     firstName: Yup.string().trim().required(required),
     lastName: Yup.string().trim().required(required),
@@ -34,6 +39,7 @@ const addressSchema = Yup.object().shape({
 
 export {
     registrationSchema,
+    loginSchema,
     personalDetailsSchema,
     personalDetailsSchemaV2,
     addressSchema

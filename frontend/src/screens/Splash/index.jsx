@@ -29,7 +29,6 @@ const SplashScreen = () => {
                     dispatch({ type: 'SET_CART', cart: cart });
                 if (user)
                     dispatch({ type: 'SET_USER', user: user });
-                console.log('wishList', wishList)
                 if (wishList)
                     dispatch({ type: 'SET_WISH_LIST', wishList: wishList });
                 dispatch({ type: 'SET_PRODUCTS', products: products.sort(sortByPrice) });

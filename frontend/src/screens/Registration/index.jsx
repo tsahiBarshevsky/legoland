@@ -418,7 +418,6 @@ const styles = StyleSheet.create({
         marginBottom: 15
     },
     link: {
-        // color: primary,
         fontWeight: 'bold'
     }
 });
