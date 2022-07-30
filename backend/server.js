@@ -45,10 +45,15 @@ app.get('/get-all-products', async (req, res) => {
     );
 });
 
-// Search product by name
-app.get('/search-product-by-name', async (req, res) => {
-    const name = req.query.name;
-    Product.find({ "name": { $regex: new RegExp(name, "i") } },
+// Search product by term
+app.get('/search-product-by-term', async (req, res) => {
+    const term = req.query.term;
+    Product.find({
+        $or: [
+            { "name": { $regex: new RegExp(term, "i") } },
+            { "brand": { $regex: new RegExp(term, "i") } }
+        ]
+    },
         function (err, result) {
             if (err) {
                 console.log("Error: " + err)

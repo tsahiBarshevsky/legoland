@@ -12,7 +12,7 @@ const Filters = ({ filterPanelRef }) => {
 
     const onSearch = () => {
         if (filter.trim()) {
-            navigation.navigate('Search', { name: filter });
+            navigation.navigate('Search', { term: filter });
             setTimeout(() => {
                 setFilter('');
             }, 500);
