@@ -1,19 +1,49 @@
-import React, { useContext } from 'react';
-import { StyleSheet, Platform, StatusBar, SafeAreaView, Text, View, ScrollView, FlatList, Image } from 'react-native';
+import React, { useContext, useCallback } from 'react';
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { useSelector } from 'react-redux';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import moment from 'moment';
 import { ThemeContext } from '../../utils/ThemeManager';
 import { darkMode, lightMode } from '../../utils/themes';
-import moment from 'moment';
+
+// React Native Componetns
+import {
+    StyleSheet,
+    Platform,
+    StatusBar,
+    SafeAreaView,
+    Text,
+    View,
+    ScrollView,
+    FlatList,
+    Image,
+    BackHandler
+} from 'react-native';
 
 const OrderScreen = ({ route }) => {
-    const { order } = route.params;
+    const { order, origin } = route.params;
     const { theme } = useContext(ThemeContext);
     const products = useSelector(state => state.products);
+    const navigation = useNavigation();
 
     const getImageLink = (item) => {
         return products.find((e) => e.catalogNumber === item.catalogNumber).image;
     }
+
+    useFocusEffect(
+        useCallback(() => {
+            const onBackPressed = () => {
+                if (origin === 'Checkout')
+                    navigation.popToTop();
+                else
+                    navigation.goBack();
+                return true;
+            };
+            BackHandler.addEventListener('hardwareBackPress', onBackPressed);
+            return () =>
+                BackHandler.removeEventListener('hardwareBackPress', onBackPressed);
+        }, [origin])
+    );
 
     return (
         <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>

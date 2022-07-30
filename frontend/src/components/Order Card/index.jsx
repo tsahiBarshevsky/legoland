@@ -33,7 +33,7 @@ const OrderCard = ({ order }) => {
 
     return (
         <TouchableOpacity
-            onPress={() => navigation.navigate('Order', { order })}
+            onPress={() => navigation.navigate('Order', { order: order, origin: 'Orders' })}
             activeOpacity={1}
         >
             <View style={styles.status}>

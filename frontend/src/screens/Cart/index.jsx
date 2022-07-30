@@ -124,6 +124,8 @@ const CartScreen = () => {
     const onCheckout = () => {
         navigation.navigate('Checkout', {
             checkout: checkout,
+            sum: cart.sum,
+            shipping: cart.sum >= 200 ? 'FREE' : 10,
             cart: cart,
             user: user
         });

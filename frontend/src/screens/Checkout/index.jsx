@@ -1,6 +1,6 @@
-import React, { useState, useRef, useContext, useEffect } from 'react';
+import React, { useState, useRef, useContext, useEffect, useCallback } from 'react';
 import * as Progress from 'react-native-progress';
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Formik, ErrorMessage } from 'formik';
 import update from 'immutability-helper';
 import { Ionicons, Entypo } from '@expo/vector-icons';
@@ -34,14 +34,17 @@ import {
     FlatList,
     Image,
     Keyboard,
-    ToastAndroid
+    ToastAndroid,
+    BackHandler
 } from 'react-native';
 
 const { width, height } = Dimensions.get('screen');
 
 const CheckoutScreen = ({ route }) => {
-    const { checkout, cart, user } = route.params;
+    const { checkout, sum, shipping, cart, user } = route.params;
     const { theme } = useContext(ThemeContext);
+    const [order, setOrder] = useState({});
+    const [completed, setCompleted] = useState(false);
     const [personalDetails, setPersonalDetails] = useState({});
     const [shippingDetails, setShippingDetails] = useState(
         user.addresses ? user.addresses.primary : {}
@@ -187,6 +190,7 @@ const CheckoutScreen = ({ route }) => {
                     console.log(res.message);
                     newOrder._id = res.orderId;
                     newOrder.orderNumber = res.orderNumber;
+                    setOrder(newOrder);
                     dispatch(addNewOrder(newOrder));
                     cart.products.forEach((item) => {
                         const index = products.findIndex((p) => p.catalogNumber === item.catalogNumber);
@@ -224,7 +228,11 @@ const CheckoutScreen = ({ route }) => {
                         });
                 })
                 .catch((error) => console.log(error.message))
-                .finally(() => navigation.popToTop());
+                .finally(() => {
+                    setCompleted(true);
+                    nextScreen();
+                });
+            // .finally(() => navigation.popToTop());
         });
     }
 
@@ -246,11 +254,26 @@ const CheckoutScreen = ({ route }) => {
         };
     }, []);
 
+    useFocusEffect(
+        useCallback(() => {
+            const onBackPressed = () => {
+                if (completed)
+                    navigation.popToTop();
+                else
+                    navigation.goBack();
+                return true;
+            };
+            BackHandler.addEventListener('hardwareBackPress', onBackPressed);
+            return () =>
+                BackHandler.removeEventListener('hardwareBackPress', onBackPressed);
+        }, [completed])
+    );
+
     return (
         <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
             <View style={styles.progressBar}>
                 <Progress.Bar
-                    progress={activeScreen / 3}
+                    progress={activeScreen / 4}
                     width={null}
                     height={10}
                     color={lightMode.primary}
@@ -731,6 +754,44 @@ const CheckoutScreen = ({ route }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
+                {/* Summary screen */}
+                <View style={styles.screen}>
+                    <View style={styles.center}>
+                        <Entypo
+                            name="shopping-bag"
+                            size={30}
+                            style={{ marginBottom: 10 }}
+                            color={theme === 'Light' ? 'black' : 'white'}
+                        />
+                        <Text style={[styles.thanks, styles[`text${theme}`]]}>
+                            {user.firstName} {user.lastName},{"\n"}
+                            Thanks for you purchase!
+                        </Text>
+                        <View style={styles.orderSummary}>
+                            <View style={styles.payment}>
+                                <Text style={[styles.heading, styles[`text${theme}`]]}>Subtotal</Text>
+                                <Text style={styles[`text${theme}`]}>{sum}₪</Text>
+                            </View>
+                            <View style={styles.payment}>
+                                <Text style={[styles.heading, styles[`text${theme}`]]}>Shipping</Text>
+                                <Text style={styles[`text${theme}`]}>{sum >= 200 ? `FREE` : `${shipping}₪`}</Text>
+                            </View>
+                            <View style={[styles.tile, styles[`separator${theme}`]]} />
+                            <View style={styles.payment}>
+                                <Text style={[styles.heading, styles[`text${theme}`]]}>Total</Text>
+                                <Text style={styles[`text${theme}`]}>{checkout}₪</Text>
+                            </View>
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('Order', { order: order, origin: 'Checkout' })}
+                            style={[styles.button, styles.order, styles.fill]}
+                            activeOpacity={1}
+                        >
+                            <Text style={styles.textDark}>Order Details</Text>
+                        </TouchableOpacity>
+                        <Text style={styles[`text${theme}`]}>Order #{order.orderNumber}</Text>
+                    </View>
+                </View>
             </ScrollView>
         </SafeAreaView>
     )
@@ -946,5 +1007,41 @@ const styles = StyleSheet.create({
         marginLeft: 15,
         position: 'absolute',
         bottom: 0
+    },
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%'
+    },
+    thanks: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        textAlign: 'center'
+    },
+    orderSummary: {
+        marginTop: 50,
+        width: '100%',
+        marginBottom: 25
+    },
+    payment: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%'
+    },
+    heading: {
+        fontWeight: 'bold'
+    },
+    tile: {
+        height: 0.5,
+        width: '100%',
+        borderRadius: 2,
+        marginTop: 13,
+        marginBottom: 2
+    },
+    order: {
+        width: '100%',
+        marginBottom: 10
     }
 });
