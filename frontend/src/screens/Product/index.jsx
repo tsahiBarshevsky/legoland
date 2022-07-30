@@ -30,8 +30,6 @@ const ProductScreen = ({ route }) => {
     const increment = () => {
         if (quantity < product.stock && quantity < (product.stock - quantityInCart))
             setQuantity(prevState => prevState + 1);
-        else
-            console.log('cant add anymore')
     }
 
     const decrement = () => {
@@ -211,62 +209,18 @@ const ProductScreen = ({ route }) => {
                     <Animatable.Text
                         animation='fadeInRight'
                         delay={DURATION * 2}
-                        style={styles[`text${theme}`]}
+                        style={[styles.price, styles[`text${theme}`]]}
                     >
                         {product.price}₪
                     </Animatable.Text>
                 </View>
-                <View style={styles.details}>
-                    <Animatable.View
-                        animation='zoomIn'
-                        delay={DURATION + 100}
-                        style={styles.detail}
-                    >
-                        <View style={styles.iconWrapper}>
-                            <FontAwesome5 name="hashtag" size={16} style={styles[`icon${theme}`]} />
-                        </View>
-                        <Text style={styles[`text${theme}`]}>{product.catalogNumber}</Text>
-                    </Animatable.View>
-                    <View style={[styles.separator, styles[`separatorColor${theme}`]]} />
-                    <Animatable.View
-                        animation='zoomIn'
-                        delay={DURATION + 200}
-                        style={styles.detail}
-                    >
-                        <View style={styles.iconWrapper}>
-                            <MaterialIcons name="cake" size={18} style={styles[`icon${theme}`]} />
-                        </View>
-                        <Text style={styles[`text${theme}`]}>{product.ages}+</Text>
-                    </Animatable.View>
-                    <View style={[styles.separator, styles[`separatorColor${theme}`]]} />
-                    <Animatable.View
-                        animation='zoomIn'
-                        delay={DURATION + 300}
-                        style={styles.detail}
-                    >
-                        <View style={styles.iconWrapper}>
-                            <MaterialCommunityIcons name="toy-brick" size={20} style={styles[`icon${theme}`]} />
-                        </View>
-                        <Text style={styles[`text${theme}`]}>{product.pieces}</Text>
-                    </Animatable.View>
-                    <View style={[styles.separator, styles[`separatorColor${theme}`]]} />
-                    <Animatable.View
-                        animation='zoomIn'
-                        delay={DURATION + 400}
-                        style={styles.detail}
-                    >
-                        <View style={styles.iconWrapper}>
-                            {product.stock > 0 ?
-                                <Entypo name="check" size={20} style={styles[`icon${theme}`]} />
-                                :
-                                <AntDesign name="close" size={20} style={styles[`icon${theme}`]} />
-                            }
-                        </View>
-                        <Text style={[styles.stock, styles[`text${theme}`]]}>
-                            {renderStock()}
-                        </Text>
-                    </Animatable.View>
-                </View>
+                <Animatable.Text
+                    animation='fadeIn'
+                    delay={DURATION * 3}
+                    style={[styles.title, styles[`text${theme}`]]}
+                >
+                    About this set
+                </Animatable.Text>
                 <Animatable.Text
                     animation='fadeIn'
                     delay={DURATION * 3}
@@ -274,13 +228,41 @@ const ProductScreen = ({ route }) => {
                 >
                     {product.description}
                 </Animatable.Text>
+                <Animatable.Text
+                    animation='fadeIn'
+                    delay={DURATION * 4}
+                    style={[styles.title, styles[`text${theme}`]]}
+                >
+                    Specifications
+                </Animatable.Text>
+                <Animatable.Text
+                    animation='fadeIn'
+                    delay={DURATION * 4}
+                    style={styles[`text${theme}`]}
+                >
+                    Model: #{product.catalogNumber}
+                </Animatable.Text>
+                <Animatable.Text
+                    animation='fadeIn'
+                    delay={DURATION * 4}
+                    style={styles[`text${theme}`]}
+                >
+                    Ages: {product.ages}+
+                </Animatable.Text>
+                <Animatable.Text
+                    animation='fadeIn'
+                    delay={DURATION * 4}
+                    style={styles[`text${theme}`]}
+                >
+                    Pieces: {product.pieces}
+                </Animatable.Text>
             </ScrollView>
             <Animatable.View
                 style={styles.cartOptions}
                 animation='fadeInUp'
                 delay={DURATION * 4}
             >
-                <View style={styles.quantity}>
+                <View style={[styles.quantity, product.stock > 0 ? styles.inStock : styles.outOfStock]}>
                     <TouchableOpacity
                         onPress={increment}
                         disabled={product.stock === 0}
@@ -298,12 +280,17 @@ const ProductScreen = ({ route }) => {
                 <TouchableOpacity
                     onPress={onAddNewProductToCart}
                     disabled={product.stock === 0}
-                    style={styles.button}
+                    style={[
+                        styles.button,
+                        product.stock > 0 ? styles.buttonInStock : styles.buttonOutOfStock
+                    ]}
                 >
-                    <Text style={styles.buttonCaption}>Add to cart!</Text>
+                    <Text style={styles.buttonCaption}>
+                        {product.stock > 0 ? "Add to cart!" : "Out of stock"}
+                    </Text>
                 </TouchableOpacity>
             </Animatable.View>
-        </SafeAreaView>
+        </SafeAreaView >
     )
 }
 
@@ -337,6 +324,9 @@ const styles = StyleSheet.create({
     },
     textDark: {
         color: darkMode.text
+    },
+    price: {
+        fontWeight: 'bold'
     },
     iconLight: {
         color: lightMode.text
@@ -405,11 +395,17 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         marginRight: 10
     },
+    title: {
+        fontSize: 18,
+        textDecorationLine: 'underline',
+        marginBottom: 3
+    },
     contentContainerStyle: {
         paddingHorizontal: 15,
     },
     description: {
-        flexShrink: 1
+        flexShrink: 1,
+        marginBottom: 10
     },
     cartOptions: {
         flexDirection: 'row',
@@ -422,8 +418,13 @@ const styles = StyleSheet.create({
         height: 37,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#5F7ADB',
         borderRadius: 25
+    },
+    buttonInStock: {
+        backgroundColor: '#5F7ADB',
+    },
+    buttonOutOfStock: {
+        backgroundColor: '#ACACAC',
     },
     buttonCaption: {
         color: 'white',
@@ -436,8 +437,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#5F7ADB',
         borderRadius: 25,
         paddingHorizontal: 10
+    },
+    inStock: {
+        borderColor: '#5F7ADB',
+    },
+    outOfStock: {
+        borderColor: '#ACACAC'
     }
 });
