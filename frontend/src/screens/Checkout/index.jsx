@@ -1,12 +1,12 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import * as Progress from 'react-native-progress';
 import { useNavigation } from '@react-navigation/native'
 import { Formik, ErrorMessage } from 'formik';
 import update from 'immutability-helper';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Entypo } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { CardField, useConfirmPayment } from '@stripe/stripe-react-native';
-import { Entypo } from '@expo/vector-icons';
+import { UIActivityIndicator } from 'react-native-indicators';
 import { Checkbox } from '../../components';
 import { localhost } from '../../utils/utilities';
 import { updateAddresses } from '../../redux/actions/user';
@@ -27,18 +27,17 @@ import {
     Text,
     View,
     ScrollView,
-    Button,
     KeyboardAvoidingView,
     TextInput,
     TouchableOpacity,
-    Alert,
     SafeAreaView,
     FlatList,
     Image,
+    Keyboard,
     ToastAndroid
 } from 'react-native';
 
-const { width } = Dimensions.get('screen');
+const { width, height } = Dimensions.get('screen');
 
 const CheckoutScreen = ({ route }) => {
     const { checkout, cart, user } = route.params;
@@ -47,7 +46,6 @@ const CheckoutScreen = ({ route }) => {
     const [shippingDetails, setShippingDetails] = useState(
         user.addresses ? user.addresses.primary : {}
     );
-    const [paymentConfirmation, setPaymentConfirmation] = useState({});
     const [activeScreen, setActiveScreen] = useState(1);
     const [saveAddress, setSaveAddress] = useState(false);
     const [useAddress, setUseAddress] = useState({
@@ -55,11 +53,16 @@ const CheckoutScreen = ({ route }) => {
         secondary: false
     });
     const [cardDetails, setCardDetails] = useState();
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const products = useSelector(state => state.products);
     const { confirmPayment, loading } = useConfirmPayment();
     const scrollRef = useRef(null);
     const navigation = useNavigation();
     const dispatch = useDispatch();
+
+    // Forms refs
+    const formRef1 = useRef(null);
+    const formRef2 = useRef(null);
 
     // Text inputs refs
     const lastNameRef = useRef(null);
@@ -113,9 +116,9 @@ const CheckoutScreen = ({ route }) => {
     }
 
     const handlePay = async () => {
-        console.log('hey')
+        console.log('Starting payment process...')
         if (!cardDetails?.complete) {
-            ToastAndroid.show('Please enter Complete card details', ToastAndroid.LONG);
+            ToastAndroid.show('Please enter complete card details', ToastAndroid.LONG);
             return;
         }
         const billingDetails = { email: authentication.currentUser.email };
@@ -227,7 +230,21 @@ const CheckoutScreen = ({ route }) => {
 
     const Separator = () => (
         <View style={[styles.separator, styles[`separator${theme}`]]} />
-    )
+    );
+
+    useEffect(() => {
+        const keyboardOpenListener = Keyboard.addListener("keyboardDidShow", () =>
+            setIsKeyboardOpen(true)
+        );
+        const keyboardCloseListener = Keyboard.addListener("keyboardDidHide", () =>
+            setIsKeyboardOpen(false)
+        );
+
+        return () => {
+            if (keyboardOpenListener) keyboardOpenListener.remove();
+            if (keyboardCloseListener) keyboardCloseListener.remove();
+        };
+    }, []);
 
     return (
         <SafeAreaView style={[styles.container, styles[`container${theme}`]]}>
@@ -260,7 +277,7 @@ const CheckoutScreen = ({ route }) => {
                 <View style={styles.screen}>
                     <Text style={[styles.title, styles[`text${theme}`]]}>Personal details</Text>
                     <ScrollView
-                        keyboardShouldPersistTaps="always"
+                        keyboardShouldPersistTaps="never"
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 15 }}
                     >
@@ -276,6 +293,7 @@ const CheckoutScreen = ({ route }) => {
                                     phone: user.phone
                                 }}
                                 validationSchema={personalDetailsSchema}
+                                innerRef={formRef1}
                                 enableReinitialize
                                 onSubmit={(values) => {
                                     setPersonalDetails(update(personalDetails, {
@@ -404,183 +422,198 @@ const CheckoutScreen = ({ route }) => {
                                                     )
                                                 }}
                                             />
-                                            <TouchableOpacity
-                                                onPress={handleSubmit}
-                                            // style={styles.button}
-                                            >
-                                                <Text>Next</Text>
-                                            </TouchableOpacity>
                                         </View>
                                     )
                                 }}
                             </Formik>
                         </KeyboardAvoidingView>
                     </ScrollView>
+                    <View style={[styles.buttons, isKeyboardOpen && styles.hide]}>
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={[styles.button, styles.unfill]}
+                            activeOpacity={1}
+                        >
+                            <Text style={styles[`text${theme}`]}>Cancel</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => formRef1.current?.handleSubmit()}
+                            style={[styles.button, styles.fill]}
+                            activeOpacity={1}
+                        >
+                            <Text style={styles.textDark}>Next</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
                 {/* Shipping screen */}
                 <View style={styles.screen}>
                     <Text style={[styles.title, styles[`text${theme}`]]}>Shipping</Text>
                     {Object.keys(user.addresses).length === 0 ?
-                        <ScrollView
-                            keyboardShouldPersistTaps="always"
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={{ paddingBottom: 15 }}
-                        >
-                            <KeyboardAvoidingView
-                                enabled
-                                behavior={Platform.OS === 'ios' ? 'padding' : null}
-                            >
-                                <Formik
-                                    initialValues={initialValues}
-                                    validationSchema={addressSchema}
-                                    enableReinitialize
-                                    onSubmit={(values) => {
-                                        setShippingDetails(update(shippingDetails, {
-                                            $set: { values }
-                                        }));
-                                        nextScreen();
-                                    }}
-                                >
-                                    {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
-                                        return (
-                                            <View>
-                                                <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>City</Text>
-                                                <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
-                                                    <TextInput
-                                                        placeholder='Which city do you live?'
-                                                        value={values.city}
-                                                        onChangeText={handleChange('city')}
-                                                        style={[styles.textInput, styles[`textInput${theme}`]]}
-                                                        underlineColorAndroid="transparent"
-                                                        placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                                        selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                                        blurOnSubmit={false}
-                                                        onBlur={handleBlur('city')}
-                                                        returnKeyType='next'
-                                                        onSubmitEditing={() => streetRef.current?.focus()}
-                                                    />
-                                                </View>
-                                                <ErrorMessage
-                                                    name='city'
-                                                    render={(message) => {
-                                                        return (
-                                                            <View style={styles.errorContainer}>
-                                                                <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
-                                                                <Text style={styles.error}>{message}</Text>
-                                                            </View>
-                                                        )
-                                                    }}
-                                                />
-                                                <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Street</Text>
-                                                <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
-                                                    <TextInput
-                                                        placeholder="What's your street?"
-                                                        value={values.street}
-                                                        ref={streetRef}
-                                                        onChangeText={handleChange('street')}
-                                                        style={[styles.textInput, styles[`textInput${theme}`]]}
-                                                        underlineColorAndroid="transparent"
-                                                        placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                                        selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                                        blurOnSubmit={false}
-                                                        onBlur={handleBlur('street')}
-                                                        returnKeyType='next'
-                                                        onSubmitEditing={() => houseRef.current?.focus()}
-                                                    />
-                                                </View>
-                                                <ErrorMessage
-                                                    name='street'
-                                                    render={(message) => {
-                                                        return (
-                                                            <View style={styles.errorContainer}>
-                                                                <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
-                                                                <Text style={styles.error}>{message}</Text>
-                                                            </View>
-                                                        )
-                                                    }}
-                                                />
-                                                <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>House Number</Text>
-                                                <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
-                                                    <TextInput
-                                                        placeholder="What's your house number?"
-                                                        value={values.house}
-                                                        ref={houseRef}
-                                                        onChangeText={handleChange('house')}
-                                                        style={[styles.textInput, styles[`textInput${theme}`]]}
-                                                        underlineColorAndroid="transparent"
-                                                        placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                                        selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                                        blurOnSubmit={false}
-                                                        onBlur={handleBlur('house')}
-                                                        returnKeyType='next'
-                                                        onSubmitEditing={() => floorRef.current?.focus()}
-                                                        keyboardType='numeric'
-                                                    />
-                                                </View>
-                                                <ErrorMessage
-                                                    name='house'
-                                                    render={(message) => {
-                                                        return (
-                                                            <View style={styles.errorContainer}>
-                                                                <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
-                                                                <Text style={styles.error}>{message}</Text>
-                                                            </View>
-                                                        )
-                                                    }}
-                                                />
-                                                <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Floor number</Text>
-                                                <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
-                                                    <TextInput
-                                                        placeholder='Which floor do you live?'
-                                                        value={values.floor}
-                                                        ref={floorRef}
-                                                        onChangeText={handleChange('floor')}
-                                                        style={[styles.textInput, styles[`textInput${theme}`]]}
-                                                        underlineColorAndroid="transparent"
-                                                        placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                                        selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
-                                                        onBlur={handleBlur('floor')}
-                                                        onSubmitEditing={handleSubmit}
-                                                        keyboardType='numeric'
-                                                    />
-                                                </View>
-                                                <ErrorMessage
-                                                    name='floor'
-                                                    render={(message) => {
-                                                        return (
-                                                            <View style={styles.errorContainer}>
-                                                                <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
-                                                                <Text style={styles.error}>{message}</Text>
-                                                            </View>
-                                                        )
-                                                    }}
-                                                />
-                                                <Checkbox
-                                                    checked={saveAddress}
-                                                    setChecked={setSaveAddress}
-                                                    caption='Save as primary address'
-                                                    theme={theme}
-                                                />
-                                                <TouchableOpacity
-                                                    onPress={handleSubmit}
-                                                // style={styles.button}
-                                                >
-                                                    <Text>Next</Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity
-                                                    onPress={previousScreen}
-                                                // style={styles.button}
-                                                >
-                                                    <Text>Previous</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        )
-                                    }}
-                                </Formik>
-                            </KeyboardAvoidingView>
-                        </ScrollView>
-                        :
                         <View>
+                            <ScrollView
+                                keyboardShouldPersistTaps="always"
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ paddingBottom: 15 }}
+                            >
+                                <KeyboardAvoidingView
+                                    enabled
+                                    behavior={Platform.OS === 'ios' ? 'padding' : null}
+                                >
+                                    <Formik
+                                        initialValues={initialValues}
+                                        validationSchema={addressSchema}
+                                        innerRef={formRef2}
+                                        enableReinitialize
+                                        onSubmit={(values) => {
+                                            setShippingDetails(update(shippingDetails, {
+                                                $set: { values }
+                                            }));
+                                            nextScreen();
+                                        }}
+                                    >
+                                        {({ handleChange, handleBlur, handleSubmit, values, errors, setErrors, touched }) => {
+                                            return (
+                                                <View>
+                                                    <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>City</Text>
+                                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                                        <TextInput
+                                                            placeholder='Which city do you live?'
+                                                            value={values.city}
+                                                            onChangeText={handleChange('city')}
+                                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                                            underlineColorAndroid="transparent"
+                                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                            blurOnSubmit={false}
+                                                            onBlur={handleBlur('city')}
+                                                            returnKeyType='next'
+                                                            onSubmitEditing={() => streetRef.current?.focus()}
+                                                        />
+                                                    </View>
+                                                    <ErrorMessage
+                                                        name='city'
+                                                        render={(message) => {
+                                                            return (
+                                                                <View style={styles.errorContainer}>
+                                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                                    <Text style={styles.error}>{message}</Text>
+                                                                </View>
+                                                            )
+                                                        }}
+                                                    />
+                                                    <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Street</Text>
+                                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                                        <TextInput
+                                                            placeholder="What's your street?"
+                                                            value={values.street}
+                                                            ref={streetRef}
+                                                            onChangeText={handleChange('street')}
+                                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                                            underlineColorAndroid="transparent"
+                                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                            blurOnSubmit={false}
+                                                            onBlur={handleBlur('street')}
+                                                            returnKeyType='next'
+                                                            onSubmitEditing={() => houseRef.current?.focus()}
+                                                        />
+                                                    </View>
+                                                    <ErrorMessage
+                                                        name='street'
+                                                        render={(message) => {
+                                                            return (
+                                                                <View style={styles.errorContainer}>
+                                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                                    <Text style={styles.error}>{message}</Text>
+                                                                </View>
+                                                            )
+                                                        }}
+                                                    />
+                                                    <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>House Number</Text>
+                                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                                        <TextInput
+                                                            placeholder="What's your house number?"
+                                                            value={values.house}
+                                                            ref={houseRef}
+                                                            onChangeText={handleChange('house')}
+                                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                                            underlineColorAndroid="transparent"
+                                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                            blurOnSubmit={false}
+                                                            onBlur={handleBlur('house')}
+                                                            returnKeyType='next'
+                                                            onSubmitEditing={() => floorRef.current?.focus()}
+                                                            keyboardType='numeric'
+                                                        />
+                                                    </View>
+                                                    <ErrorMessage
+                                                        name='house'
+                                                        render={(message) => {
+                                                            return (
+                                                                <View style={styles.errorContainer}>
+                                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                                    <Text style={styles.error}>{message}</Text>
+                                                                </View>
+                                                            )
+                                                        }}
+                                                    />
+                                                    <Text style={[styles.textInputTitle, styles[`text${theme}`]]}>Floor number</Text>
+                                                    <View style={[styles.textInputWrapper, styles[`textInputWrapper${theme}`]]}>
+                                                        <TextInput
+                                                            placeholder='Which floor do you live?'
+                                                            value={values.floor}
+                                                            ref={floorRef}
+                                                            onChangeText={handleChange('floor')}
+                                                            style={[styles.textInput, styles[`textInput${theme}`]]}
+                                                            underlineColorAndroid="transparent"
+                                                            placeholderTextColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                            selectionColor={theme === 'Light' ? lightMode.placeholder : darkMode.placeholder}
+                                                            onBlur={handleBlur('floor')}
+                                                            onSubmitEditing={handleSubmit}
+                                                            keyboardType='numeric'
+                                                        />
+                                                    </View>
+                                                    <ErrorMessage
+                                                        name='floor'
+                                                        render={(message) => {
+                                                            return (
+                                                                <View style={styles.errorContainer}>
+                                                                    <Ionicons style={styles.errorIcon} name="warning-outline" size={15} color='#b71c1c' />
+                                                                    <Text style={styles.error}>{message}</Text>
+                                                                </View>
+                                                            )
+                                                        }}
+                                                    />
+                                                    <Checkbox
+                                                        checked={saveAddress}
+                                                        setChecked={setSaveAddress}
+                                                        caption='Save as primary address'
+                                                        theme={theme}
+                                                    />
+                                                </View>
+                                            )
+                                        }}
+                                    </Formik>
+                                </KeyboardAvoidingView>
+                            </ScrollView>
+                            <View style={[styles.buttons, isKeyboardOpen && styles.hide]}>
+                                <TouchableOpacity
+                                    onPress={previousScreen}
+                                    style={[styles.button, styles.unfill]}
+                                >
+                                    <Text style={styles[`text${theme}`]}>Back</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => formRef2.current?.handleSubmit()}
+                                    style={[styles.button, styles.fill]}
+                                >
+                                    <Text style={styles.textDark}>Next</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        :
+                        <View style={{ height: '100%' }}>
                             <Text style={styles[`text${theme}`]}>Select address</Text>
                             <View style={styles.options}>
                                 <TouchableOpacity
@@ -620,18 +653,22 @@ const CheckoutScreen = ({ route }) => {
                                     <Text style={styles[`text${theme}`]}>{user.addresses.secondary.floor} Floor</Text>
                                 </>
                             }
-                            <TouchableOpacity
-                                onPress={nextScreen}
-                            // style={styles.button}
-                            >
-                                <Text>Next</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={previousScreen}
-                            // style={styles.button}
-                            >
-                                <Text>Previous</Text>
-                            </TouchableOpacity>
+                            <View style={[styles.buttons, { position: 'absolute', bottom: 40 }]}>
+                                <TouchableOpacity
+                                    onPress={previousScreen}
+                                    style={[styles.button, styles.unfill]}
+                                    activeOpacity={1}
+                                >
+                                    <Text style={styles[`text${theme}`]}>Back</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={nextScreen}
+                                    style={[styles.button, styles.fill]}
+                                    activeOpacity={1}
+                                >
+                                    <Text style={styles.textDark}>Next</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     }
                 </View>
@@ -643,7 +680,7 @@ const CheckoutScreen = ({ route }) => {
                         data={cart.products}
                         keyExtractor={(item) => item.catalogNumber}
                         ItemSeparatorComponent={Separator}
-                        style={{ marginBottom: 10 }}
+                        style={{ marginBottom: 10, maxHeight: height / 2 }}
                         showsVerticalScrollIndicator={false}
                         renderItem={({ item }) => {
                             return (
@@ -672,9 +709,27 @@ const CheckoutScreen = ({ route }) => {
                         style={styles.cardContainer}
                         onCardChange={(cardDetails) => setCardDetails(cardDetails)}
                     />
-                    <TouchableOpacity style={{ paddingVertical: 10 }} onPress={onPurchase} disabled={loading}>
-                        <Text style={!loading ? { color: 'black' } : { color: 'red' }}>Place your order</Text>
-                    </TouchableOpacity>
+                    <View style={[styles.buttons, styles.absolute, isKeyboardOpen && styles.hide]}>
+                        <TouchableOpacity
+                            onPress={previousScreen}
+                            style={[styles.button, styles.unfill]}
+                            activeOpacity={1}
+                        >
+                            <Text style={styles.textDark}>Back</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={onPurchase}
+                            disabled={loading}
+                            activeOpacity={1}
+                            style={[styles.button, styles.fill]}
+                        >
+                            {loading ?
+                                <UIActivityIndicator size={25} count={12} color='white' />
+                                :
+                                <Text style={styles[`text${theme}`]}>Place Order</Text>
+                            }
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -748,10 +803,6 @@ const styles = StyleSheet.create({
     textInputDark: {
         color: darkMode.text
     },
-    button: {
-        position: 'absolute',
-        bottom: 0
-    },
     options: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -767,7 +818,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 2,
         borderRadius: 10,
-        elevation: 1,
         paddingHorizontal: 10
     },
     checked: {
@@ -810,7 +860,7 @@ const styles = StyleSheet.create({
     },
     cardContainer: {
         height: 45,
-        marginBottom: 10,
+        marginBottom: 30,
     },
     summaryBox: {
         flexDirection: 'row',
@@ -867,4 +917,34 @@ const styles = StyleSheet.create({
         color: '#b71c1c',
         fontWeight: 'bold'
     },
+    buttons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 15
+    },
+    button: {
+        height: 40,
+        width: 120,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 25,
+    },
+    fill: {
+        backgroundColor: lightMode.primary,
+        elevation: 1
+    },
+    unfill: {
+        borderWidth: 2,
+        borderColor: lightMode.primary
+    },
+    hide: {
+        display: 'none'
+    },
+    absolute: {
+        marginLeft: 15,
+        position: 'absolute',
+        bottom: 0
+    }
 });

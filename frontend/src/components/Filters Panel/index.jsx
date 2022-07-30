@@ -302,8 +302,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 7,
         marginBottom: 10,
-        marginRight: 10,
-        elevation: 1
+        marginRight: 10
     },
     selectedBrand: {
         backgroundColor: lightMode.primary
@@ -330,8 +329,7 @@ const styles = StyleSheet.create({
         height: 37,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 25,
-        elevation: 1
+        borderRadius: 25
     },
     fill: {
         backgroundColor: lightMode.primary

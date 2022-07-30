@@ -329,8 +329,7 @@ const styles = StyleSheet.create({
         height: 37,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 25,
-        elevation: 1
+        borderRadius: 25
     },
     fill: {
         backgroundColor: lightMode.primary
@@ -348,8 +347,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 35,
         paddingVertical: 10,
         position: 'absolute',
-        bottom: 30,
-        elevation: 1
+        bottom: 30
     },
     emptyCartButtonCaption: {
         color: 'white',

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Platform, StatusBar, Text, View, Image, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
 import * as Animatable from 'react-native-animatable';
-import { Feather, AntDesign, Entypo, MaterialIcons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather, AntDesign, Entypo } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -11,6 +10,19 @@ import { addNewProductToWishList, removeProductFromWishList } from '../../redux/
 import { localhost } from '../../utils/utilities';
 import { ThemeContext } from '../../utils/ThemeManager';
 import { lightMode, darkMode } from '../../utils/themes';
+
+// React Native Components
+import {
+    StyleSheet,
+    Platform,
+    StatusBar,
+    Text,
+    View,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    SafeAreaView
+} from 'react-native';
 
 const DURATION = 100;
 
@@ -150,15 +162,6 @@ const ProductScreen = ({ route }) => {
                     }, 200);
                 });
         }
-    }
-
-    const renderStock = () => {
-        if (product.stock > 10)
-            return `In${"\n"}stock`;
-        else
-            if (product.stock > 0)
-                return `Low${"\n"}stock`;
-        return `Out${"\n"}of stock`;
     }
 
     useEffect(() => {
