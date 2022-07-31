@@ -1,6 +1,6 @@
 const localhost = '10.0.0.9:5000';
 const shipping = 10;
-const brands = ['Star Wars', 'Marvel', 'Harry Potter', 'Icons', 'Architecture'];
+const brands = ['Star Wars', 'Marvel', 'Harry Potter', 'Icons', 'Architecture', 'Technic'];
 
 const sortByPrice = (a, b) => {
     if (a.price > b.price)

@@ -9,6 +9,17 @@ const ProductCard = ({ product, index }) => {
     const { theme } = useContext(ThemeContext);
     const navigation = useNavigation();
 
+    const renderProductName = () => {
+        switch (product.brand) {
+            case 'Marvel':
+            case 'Star Wars':
+            case 'Harry Potter':
+                return `${product.brand}™ ${product.name}`;
+            default:
+                return product.name;
+        }
+    }
+
     return (
         <TouchableOpacity
             onPress={() => navigation.navigate('Product', { product })}
@@ -23,7 +34,7 @@ const ProductCard = ({ product, index }) => {
                 />
             </SharedElement>
             <Text style={[styles.title, styles[`text${theme}`]]}>
-                {product.brand}™ {product.name}
+                {renderProductName()}
             </Text>
             <Text style={styles[`text${theme}`]}>{product.price}₪</Text>
         </TouchableOpacity>

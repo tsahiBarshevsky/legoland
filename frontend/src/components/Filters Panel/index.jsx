@@ -10,7 +10,7 @@ import { lightMode, darkMode } from '../../utils/themes';
 import { brands as brandsList } from '../../utils/utilities';
 
 const defaultAges = [1, 18];
-const defaultPrices = [179, 1699];
+const defaultPrices = [179, 1715];
 
 const FilterPanel = ({ filterPanelRef }) => {
     const { theme } = useContext(ThemeContext);
