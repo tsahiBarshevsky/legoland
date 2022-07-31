@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { StyleSheet, TextInput, TouchableOpacity, View, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { ThemeContext } from '../../utils/ThemeManager';
@@ -8,6 +8,7 @@ import { lightMode, darkMode } from '../../utils/themes';
 const Filters = ({ filterPanelRef }) => {
     const { theme } = useContext(ThemeContext);
     const [filter, setFilter] = useState('');
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const navigation = useNavigation();
 
     const onSearch = () => {
@@ -18,6 +19,31 @@ const Filters = ({ filterPanelRef }) => {
             }, 500);
         }
     }
+
+    const onOpenFilterPanel = () => {
+        if (isKeyboardOpen) {
+            Keyboard.dismiss();
+            setTimeout(() => {
+                filterPanelRef.current?.open();
+            }, 200);
+        }
+        else
+            filterPanelRef.current?.open();
+    }
+
+    useEffect(() => {
+        const keyboardOpenListener = Keyboard.addListener("keyboardDidShow", () =>
+            setIsKeyboardOpen(true)
+        );
+        const keyboardCloseListener = Keyboard.addListener("keyboardDidHide", () =>
+            setIsKeyboardOpen(false)
+        );
+
+        return () => {
+            if (keyboardOpenListener) keyboardOpenListener.remove();
+            if (keyboardCloseListener) keyboardCloseListener.remove();
+        };
+    }, []);
 
     return (
         <View style={[styles.container, styles[`container${theme}`]]}>
@@ -34,7 +60,7 @@ const Filters = ({ filterPanelRef }) => {
                 style={[styles.textInput, styles[`textInput${theme}`]]}
             />
             <TouchableOpacity
-                onPress={() => filterPanelRef.current?.open()}
+                onPress={onOpenFilterPanel}
                 style={styles.button}
                 activeOpacity={1}
             >

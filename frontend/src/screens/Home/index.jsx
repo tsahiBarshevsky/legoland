@@ -1,6 +1,6 @@
 import React, { useRef, useContext } from 'react';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
-import { StyleSheet, Platform, StatusBar, View, ScrollView } from 'react-native';
+import { StyleSheet, Platform, StatusBar, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import MasonryList from '@react-native-seoul/masonry-list';
 import { BottomSheet, FilterPanel, Filters, Header, ProductCard } from '../../components';
@@ -18,27 +18,25 @@ const HomeScreen = () => {
         <>
             <ExpoStatusBar style={theme === 'Light' ? 'dark' : 'light'} />
             <View style={[styles.container, styles[`container${theme}`]]}>
-                <ScrollView keyboardShouldPersistTaps='handled'>
-                    <Header
-                        cart={cart}
-                        bottomSheetRef={bottomSheetRef}
-                    />
-                    <Filters filterPanelRef={filterPanelRef} />
-                    <MasonryList
-                        data={products}
-                        keyExtractor={(item) => item._id}
-                        renderItem={({ item, i }) => {
-                            return (
-                                <ProductCard
-                                    product={item}
-                                    index={i}
-                                />
-                            )
-                        }}
-                        contentContainerStyle={styles.contentContainerStyle}
-                        style={{ alignSelf: 'stretch' }}
-                    />
-                </ScrollView>
+                <Header
+                    cart={cart}
+                    bottomSheetRef={bottomSheetRef}
+                />
+                <Filters filterPanelRef={filterPanelRef} />
+                <MasonryList
+                    data={products}
+                    keyExtractor={(item) => item._id}
+                    renderItem={({ item, i }) => {
+                        return (
+                            <ProductCard
+                                product={item}
+                                index={i}
+                            />
+                        )
+                    }}
+                    contentContainerStyle={styles.contentContainerStyle}
+                    style={{ alignSelf: 'stretch' }}
+                />
             </View>
             <BottomSheet bottomSheetRef={bottomSheetRef} />
             <FilterPanel filterPanelRef={filterPanelRef} />

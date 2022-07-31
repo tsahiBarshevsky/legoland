@@ -1,7 +1,8 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useContext } from 'react';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 import { CardStyleInterpolators } from '@react-navigation/stack';
+import { ThemeContext } from '../../utils/ThemeManager';
 
 // App screens
 import {
@@ -20,6 +21,7 @@ import {
     SplashScreen,
     WishListScreen,
 } from '../../screens';
+import { darkMode, lightMode } from '../../utils/themes';
 
 const Stack = createSharedElementStackNavigator();
 const options = {
@@ -28,8 +30,17 @@ const options = {
 };
 
 const AppNavigator = () => {
+    const { theme } = useContext(ThemeContext);
+    const navigatorTheme = {
+        ...DefaultTheme,
+        colors: {
+            ...DefaultTheme.colors,
+            background: theme === 'Light' ? lightMode.background : darkMode.background
+        }
+    }
+
     return (
-        <NavigationContainer>
+        <NavigationContainer theme={navigatorTheme}>
             <Stack.Navigator initialRouteName='Login'>
                 <Stack.Screen
                     name='Registration'
